@@ -92,6 +92,10 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
 .over .logo{font-size:clamp(36px,8vw,60px)}
 button.perk{background:#ff7ad9;color:var(--night);box-shadow:0 3px 0 #8e1f3f;animation:glow 1.1s ease-in-out infinite alternate}
 @keyframes glow{to{box-shadow:0 3px 0 #8e1f3f,0 0 20px 5px rgba(255,122,217,.65)}}
+.dev{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:7;display:flex;gap:6px;align-items:center;
+  background:rgba(200,30,60,.9);padding:4px 5px;border-radius:999px}
+.dev b{font-size:10px;font-weight:900;letter-spacing:.15em;color:#fff;padding:0 6px}
+.dev button{font-size:10px;padding:6px 10px;box-shadow:none}
 .over p{font-weight:700;line-height:1.5;margin:.6em 0 1.2em}
 #pauseBtn .pi{display:none}
 /* compact HUD for phones, portrait (narrow) and landscape (short): the scene gets the room */
@@ -658,6 +662,10 @@ document.getElementById('pauseBtn').addEventListener('click',()=>togglePause());
 document.getElementById('resumeBtn').addEventListener('click',()=>togglePause(false));
 document.getElementById('pauseEl').addEventListener('click',e=>{if(e.target.id==='pauseEl')togglePause(false);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)togglePause(true);});
+/* dev mode (?dev): jump ahead in points to test worlds and level-ups */
+if(new URLSearchParams(location.search).has('dev')){const bar=document.createElement('div');bar.className='dev';
+ bar.innerHTML='<b>DEV</b><button type="button" data-p="50">+50</button><button type="button" data-p="150">+150 Punkte</button>';document.body.appendChild(bar);
+ bar.addEventListener('click',e=>{const p=+e.target.dataset.p;if(!p||gameOver||paused)return;score+=p;elScore.textContent=score;e.target.blur();});}
 /* handheld pad */
 const camV=[0,0],padB=document.getElementById('padB'),padBLabel=document.getElementById('padBLabel');let bPush=false;
 function tapKey(el,fn){el.addEventListener('pointerdown',e=>{e.preventDefault();el.classList.add('on');if(navigator.vibrate)navigator.vibrate(10);fn();});

@@ -34,6 +34,9 @@ Moves: Hüftschwung, Klatschen, Pirouette, Disco-Finger, Salzburg-Hüpfer.
 Joker **Sammi**, ein schwarz-weißer Shih Tzu: Würde Bici Schaden nehmen, rennt er herbei und
 bellt laut. Mit 50 % Chance verbellt er den Goblin und der Schaden fällt weg, sonst passiert nichts.
 
+**Dev-Modus:** `?dev` an die Adresse hängen (z. B. `…/bici_in_salzburg/?dev`), dann gibt es oben
+Buttons für +50 und +150 Punkte, um Welten und Level-ups direkt zu testen.
+
 ## Welten und Level
 
 | Punkte | Welt | Besonderheit |
