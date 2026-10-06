@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#121630">
 <style>*,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}</style>
 <title>Bici in Salzburg</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23121630'/%3E%3Ctext x='32' y='46' font-family='Arial Black,sans-serif' font-size='40' text-anchor='middle' fill='%23ffc65c'%3EB%3C/text%3E%3C/svg%3E">
@@ -89,12 +92,108 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
 .over .logo{font-size:clamp(36px,8vw,60px)}
 .over p{font-weight:700;line-height:1.5;margin:.6em 0 1.2em}
 #pauseBtn .pi{display:none}
-@media (max-width:560px){.stats .opt{display:none}.hint{display:none}.logo{font-size:40px}
-  #pauseBtn{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));right:16px;z-index:6;width:48px;height:48px;padding:0;display:grid;place-items:center}
-  #pauseBtn .pl{display:none}#pauseBtn .pi{display:block;font-size:16px;letter-spacing:0}}
+/* compact HUD for phones, portrait (narrow) and landscape (short): the scene gets the room */
+@media (max-width:560px),(max-height:500px){
+  .hud{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));
+    padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  .eyebrow,.sub,.hint,.stats .opt,.caption p{display:none}
+  .logo{font-size:30px;text-shadow:3px 3px 0 var(--rose);margin:0}
+  .stats{padding:6px 10px;gap:0 10px;border-radius:10px;margin-right:54px}
+  .stats b{font-size:15px}.stats span{font-size:9px}.stats b.joker{font-size:11px}
+  .bar{width:60px;height:8px}
+  .caption{padding:7px 12px;border-radius:10px}.caption .move{font-size:16px}
+  .controls{gap:6px}
+  button{font-size:11px;padding:9px 12px}
+  #pauseBtn{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));z-index:6;width:44px;height:44px;padding:0;display:grid;place-items:center}
+  #pauseBtn .pl{display:none}#pauseBtn .pi{display:block;font-size:15px;letter-spacing:0}
+  .banner,.toast{max-width:min(340px,calc(100% - 32px));font-size:13px;padding:8px 12px}
+  .over .card{padding:16px 20px}.over p{margin:.4em 0 .8em}}
+@media (max-height:500px) and (min-width:561px){.banner{top:auto;bottom:70px}.toast{top:calc(10px + env(safe-area-inset-top,0px))}}
+/* ---------- handheld mode (touch devices): Game-Boy-style pad ---------- */
+.pad,.tb{display:none}
+html{touch-action:manipulation}
+body.gb .hint,body.gb .kb,body.gb .controls>button:not(#fmtBtn),body.gb .logo{display:none!important}
+body.gb .tb{display:inline}
+body.gb .pad{display:grid;position:fixed;z-index:4;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+    --gb:#d8d3c9;--navy:#2f2a5c;--plum:#a3245a;--cross:#26242e}
+body.gb .pad button{all:unset;box-sizing:border-box;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent}
+body.gb .pad button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+body.gb .key{display:grid;justify-items:center;gap:6px}
+body.gb .key span{font-family:var(--body);font-weight:900;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--navy)}
+body.gb .dpad{position:relative;display:grid;grid-template:repeat(3,var(--c,46px))/repeat(3,var(--c,46px));justify-self:start}
+body.gb .dpad .d{background:var(--cross);box-shadow:0 3px 0 #0e0d14}
+body.gb .dpad .up{grid-area:1/2;border-radius:8px 8px 0 0}
+body.gb .dpad .left{grid-area:2/1;border-radius:8px 0 0 8px}
+body.gb .dpad .mid{grid-area:2/2}
+body.gb .dpad .right{grid-area:2/3;border-radius:0 8px 8px 0}
+body.gb .dpad .down{grid-area:3/2;border-radius:0 0 8px 8px}
+body.gb .dpad .d::after{content:'';position:absolute;inset:0;margin:auto;width:0;height:0;border:7px solid transparent}
+body.gb .dpad button.d{position:relative}
+body.gb .dpad .up::after{border-bottom-color:#5d5a6c;border-top:0}
+body.gb .dpad .down::after{border-top-color:#5d5a6c;border-bottom:0}
+body.gb .dpad .left::after{border-right-color:#5d5a6c;border-left:0}
+body.gb .dpad .right::after{border-left-color:#5d5a6c;border-right:0}
+body.gb .dpad .d.on{background:#3e3b4a;transform:translateY(2px);box-shadow:0 1px 0 #0e0d14}
+body.gb .dpad .cap{position:absolute;left:0;right:0;bottom:-20px;text-align:center;font-weight:900;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--navy)}
+body.gb .ab{display:flex;align-items:flex-end;gap:16px;transform:rotate(-22deg);justify-self:end}
+body.gb .ab .kb-a{margin-bottom:34px}
+body.gb .pad .round{width:var(--r,64px);height:var(--r,64px);border-radius:50%;display:grid!important;place-items:center;background:var(--plum);color:rgba(255,255,255,.55);
+    font-family:var(--display);font-size:20px;box-shadow:0 4px 0 #5e1233,inset 0 -4px 0 rgba(0,0,0,.18)}
+body.gb .pad .round:active,body.gb .pad .round.on{transform:translateY(3px);box-shadow:0 1px 0 #5e1233}
+body.gb #padB.alert{background:#2a9d8f;box-shadow:0 4px 0 #14564e,0 0 0 0 rgba(42,157,143,.7);animation:ping 1s ease-out infinite}
+@keyframes ping{to{box-shadow:0 4px 0 #14564e,0 0 0 16px rgba(42,157,143,0)}}
+body.gb .ab .key{transform:none}
+body.gb .pills{display:flex;justify-content:center;gap:20px}
+body.gb .pad .pill{width:52px;height:14px;border-radius:99px;background:#8d8996;box-shadow:inset 0 -2px 0 rgba(0,0,0,.25);transform:rotate(-22deg);position:relative}
+body.gb .pad .pill::after{content:'';position:absolute;inset:-14px -8px}
+body.gb .pad .pill:active{background:#6f6b7a}
+body.gb .brand{font-family:var(--display);color:var(--navy);font-size:18px;letter-spacing:.04em}
+body.gb .brand i{font-family:var(--body);font-weight:900;font-size:13px;letter-spacing:.2em;color:var(--plum)}
+body.gb .grille{position:absolute;right:18px;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:7px;transform:rotate(-22deg);pointer-events:none}
+body.gb .grille i{width:5px;height:42px;border-radius:3px;background:rgba(47,42,92,.22);box-shadow:inset 0 2px 2px rgba(0,0,0,.25)}
+/* portrait: classic handheld, screen on top, pad below */
+@media (orientation:portrait){
+  body.gb{--pad:clamp(260px,40vh,340px)}
+  body.gb{background:#d8d3c9}
+  body.gb #stage,body.gb .vignette,body.gb .intro,body.gb .hud{top:calc(10px + env(safe-area-inset-top,0px));left:10px;right:10px;bottom:var(--pad);position:fixed}
+  body.gb #stage,body.gb .vignette{border-radius:10px 10px 36px 10px;overflow:hidden;box-shadow:0 0 0 6px #4a4760}
+  body.gb .hud{padding:8px}
+  body.gb .logo{display:none}
+  body.gb .stats{margin-right:0}
+  body.gb .pad{left:0;right:0;bottom:0;height:var(--pad);background:var(--gb);padding:18px 22px calc(16px + env(safe-area-inset-bottom,0px));
+    grid-template:auto 1fr auto/1fr 1fr;grid-template-areas:"brand brand" "dpad ab" "pills pills";align-items:center}
+  body.gb .brand{grid-area:brand}
+  body.gb .dpad{grid-area:dpad;--c:48px;margin-left:4px}
+  body.gb .ab{grid-area:ab;margin-right:6px}
+  body.gb .pills{grid-area:pills;padding-bottom:6px;justify-content:flex-start;padding-left:6%}
+  body.gb .banner,body.gb .toast{top:auto!important;bottom:calc(var(--pad) + 58px)!important}
+  body.gb .toast{bottom:calc(var(--pad) + 104px)!important}
+}
+/* landscape: full-screen scene, controls float at the edges */
+@media (orientation:landscape){
+  body.gb .pad{inset:0;pointer-events:none;background:none}
+  body.gb .pad>*{pointer-events:auto}
+  body.gb .brand,body.gb .grille{display:none}
+  body.gb .dpad{position:fixed;left:max(18px,env(safe-area-inset-left,0px));bottom:calc(30px + env(safe-area-inset-bottom,0px));--c:42px;opacity:.92}
+  body.gb .dpad .cap{color:var(--ink);text-shadow:0 1px 2px #000}
+  body.gb .ab{position:fixed;right:max(22px,env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));--r:58px}
+  body.gb .pills{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  body.gb .key span{color:var(--ink);text-shadow:0 1px 2px #000}
+  body.gb .pad .pill{background:rgba(141,137,150,.9)}
+  body.gb .caption{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);max-width:40vw;text-align:center}
+  body.gb .toast{top:calc(56px + env(safe-area-inset-top,0px))!important}
+  body.gb .banner{bottom:calc(64px + env(safe-area-inset-bottom,0px))!important;top:auto!important}
+  body.gb .stats{margin-right:0}
+}
+body.gb #fmtBtn{position:fixed;z-index:6;top:calc(18px + env(safe-area-inset-top,0px));left:18px;font-size:10px;padding:7px 11px}
+@media (orientation:landscape){body.gb #fmtBtn{top:calc(10px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px))}}
 </style>
 </head>
 <body>
+<script>/* layout mode: saved choice, else Game Boy on touch devices */
+(function(){let m=null;try{m=localStorage.getItem('bici-format');}catch(e){}
+ if(m!=='gb'&&m!=='classic')m=matchMedia('(hover:none) and (pointer:coarse)').matches?'gb':'classic';
+ document.body.classList.toggle('gb',m==='gb');})();</script>
 
 <div id="stage" aria-label="3D-Szene: Bici und ihr Hund Bob tanzen auf dem Residenzplatz in Salzburg"></div>
 <div class="vignette"></div>
@@ -108,9 +207,30 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
 <div class="bubble robi" id="rbubble" hidden></div>
 <div class="bubble menei" id="mbubble" hidden></div>
 <div class="bubble scream" id="cbubble" hidden></div>
-<div class="banner" id="banner" hidden>Kerstin will die Tanzfläche! Tippe sie an oder drücke K, um sie zurückzudrängen.</div>
+<div class="banner" id="banner" hidden>Kerstin will die Tanzfläche! <span class="kb">Tippe sie an oder drücke K</span><span class="tb">Drücke B oder tippe sie an</span>, um sie zurückzudrängen.</div>
 <div class="over" id="over" hidden><div class="card"><div class="logo">GAME OVER</div><p><span id="overMsg">Die Goblins haben den Residenzplatz erobert.</span><br>Punkte: <b id="overScore">0</b></p><button id="againBtn" type="button">Nochmal</button></div></div>
 <div class="over" id="pauseEl" hidden><div class="card"><div class="logo">PAUSE</div><p>Bici verschnauft kurz. Die Goblins warten.<br><small>Tippen zum Weiterspielen</small></p><button id="resumeBtn" type="button">Weiter</button></div></div>
+<div class="pad" id="pad">
+  <div class="brand" aria-hidden="true">BICI <i>POCKET</i></div>
+  <div class="dpad" aria-label="Kamera">
+    <button class="d up" data-d="0,-1" type="button" aria-label="Kamera näher"></button>
+    <button class="d left" data-d="-1,0" type="button" aria-label="Kamera nach links drehen"></button>
+    <span class="d mid"></span>
+    <button class="d right" data-d="1,0" type="button" aria-label="Kamera nach rechts drehen"></button>
+    <button class="d down" data-d="0,1" type="button" aria-label="Kamera weiter weg"></button>
+    <span class="cap">Kamera</span>
+  </div>
+  <div class="ab">
+    <div class="key kb-b"><button class="round" id="padB" type="button" aria-label="B: Bob rollt">B</button><span id="padBLabel">Rolle</span></div>
+    <div class="key kb-a"><button class="round" id="padA" type="button" aria-label="A: Mozartkugel werfen">A</button><span>Werfen</span></div>
+  </div>
+  <div class="pills">
+    <div class="key"><button class="pill" id="padSound" type="button" aria-label="Sound an oder aus"></button><span id="padSoundLabel">Sound</span></div>
+    <div class="key"><button class="pill" id="padMove" type="button" aria-label="Nächster Tanz-Move"></button><span>Move</span></div>
+    <div class="key"><button class="pill" id="padPause" type="button" aria-label="Pause"></button><span>Pause</span></div>
+  </div>
+  <div class="grille" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+</div>
 <div class="hud">
   <div class="row">
     <div>
@@ -136,6 +256,7 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
     </div>
     <div>
       <div class="controls">
+        <button class="ghost" id="fmtBtn" type="button">Game-Boy-Modus</button>
         <button class="ghost" id="pauseBtn" type="button" aria-label="Pause"><span class="pi" aria-hidden="true">❚❚</span><span class="pl">Pause</span></button>
         <button class="ghost" id="soundBtn" type="button">Sound an</button>
         <button class="ghost" id="nextBtn" type="button">Nächster Move</button>
@@ -168,9 +289,10 @@ const scene=new THREE.Scene();
 scene.fog=new THREE.Fog(0x4b3a6c,40,150);scene.fog.color.convertSRGBToLinear();
 const camera=new THREE.PerspectiveCamera(50,1,0.1,500);
 
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;
+let SR=stage.getBoundingClientRect();
+function resize(){SR=stage.getBoundingClientRect();const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;
   camera.fov=w<h?62:50;camera.updateProjectionMatrix();}
-new ResizeObserver(resize).observe(stage);resize();
+new ResizeObserver(resize).observe(stage);resize();addEventListener('resize',()=>SR=stage.getBoundingClientRect());
 
 /* ---------- helpers ---------- */
 const M=(color,o={})=>{const m=new THREE.MeshStandardMaterial(Object.assign({color,roughness:.85,metalness:0},o));m.color.convertSRGBToLinear();m.emissive.convertSRGBToLinear();return m;};
@@ -439,7 +561,7 @@ function toggleSound(){
  soundOn=!soundOn;
  if(soundOn){if(!paused)ac.resume();const b=beatNow(),n=Math.ceil(b);nextStep=n*4;stepTime=ac.currentTime+(n-b)*60/BPM;timer=setInterval(schedule,25);}
  else{clearInterval(timer);}
- soundBtn.textContent=soundOn?'Sound aus':'Sound an';}
+ soundBtn.textContent=soundOn?'Sound aus':'Sound an';document.getElementById('padSoundLabel').textContent=soundOn?'Sound aus':'Sound';}
 const soundBtn=document.getElementById('soundBtn');soundBtn.addEventListener('click',toggleSound);
 function nextMove(){if(!paused)offset++;}
 document.getElementById('nextBtn').addEventListener('click',nextMove);
@@ -451,6 +573,27 @@ document.getElementById('pauseBtn').addEventListener('click',()=>togglePause());
 document.getElementById('resumeBtn').addEventListener('click',()=>togglePause(false));
 document.getElementById('pauseEl').addEventListener('click',e=>{if(e.target.id==='pauseEl')togglePause(false);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)togglePause(true);});
+/* handheld pad */
+const camV=[0,0],padB=document.getElementById('padB'),padBLabel=document.getElementById('padBLabel');let bPush=false;
+function tapKey(el,fn){el.addEventListener('pointerdown',e=>{e.preventDefault();el.classList.add('on');if(navigator.vibrate)navigator.vibrate(10);fn();});
+ ['pointerup','pointercancel','pointerleave'].forEach(ev=>el.addEventListener(ev,()=>el.classList.remove('on')));}
+tapKey(document.getElementById('padA'),()=>throwAt(nearest()));
+tapKey(padB,()=>K.state==='in'?kPush():bobRolle());
+document.querySelectorAll('.dpad button').forEach(el=>{const d=el.dataset.d.split(',').map(Number);
+ el.addEventListener('pointerdown',e=>{e.preventDefault();el.classList.add('on');camV[0]=d[0];camV[1]=d[1];});
+ ['pointerup','pointercancel','pointerleave'].forEach(ev=>el.addEventListener(ev,()=>{el.classList.remove('on');camV[0]=camV[1]=0;}));});
+document.getElementById('padSound').addEventListener('click',toggleSound);
+const fmtBtn=document.getElementById('fmtBtn');
+function showFormat(){const gb=document.body.classList.contains('gb');fmtBtn.textContent=gb?'Klassisch':'Game-Boy-Modus';
+ fmtBtn.setAttribute('aria-label',gb?'Zur klassischen Ansicht wechseln':'Zum Game-Boy-Modus wechseln');}
+fmtBtn.addEventListener('click',()=>{const gb=document.body.classList.toggle('gb');try{localStorage.setItem('bici-format',gb?'gb':'classic');}catch(e){}
+ showFormat();resize();fmtBtn.blur();});
+showFormat();
+document.getElementById('padMove').addEventListener('click',nextMove);
+document.getElementById('padPause').addEventListener('click',()=>togglePause());
+const ARROWS={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
+addEventListener('keydown',e=>{const d=ARROWS[e.key];if(d){e.preventDefault();camV[0]=d[0];camV[1]=d[1];}});
+addEventListener('keyup',e=>{if(ARROWS[e.key])camV[0]=camV[1]=0;});
 document.getElementById('againBtn').addEventListener('click',()=>restart());
 
 /* ---------- loop ---------- */
@@ -491,7 +634,7 @@ function nearest(){let best=null,bd=1e9;goblins.forEach(o=>{if(o.alive&&!o.targe
 function throwAt(o){if(gameOver||paused||!o||!o.alive||o.targeted)return;o.targeted=true;throwUntil=gnow()+320;
  const m=new THREE.Mesh(new THREE.SphereGeometry(.11,16,12),kugelM);m.castShadow=true;scene.add(m);
  shots.push({m,o,t:0,from:new THREE.Vector3(-.4,1.6,.2).applyAxisAngle(UP,root.rotation.y)});sfx('throw');}
-function clickAt(x,y){if(gameOver||paused)return;ndc.set(x/innerWidth*2-1,-(y/innerHeight)*2+1);raycaster.setFromCamera(ndc,camera);
+function clickAt(x,y){if(gameOver||paused)return;ndc.set((x-SR.left)/SR.width*2-1,-((y-SR.top)/SR.height)*2+1);raycaster.setFromCamera(ndc,camera);
  if(K.state==='in'&&raycaster.intersectObject(kRoot,true).length){kPush();return;}
  const hit=raycaster.intersectObjects(goblins.filter(o=>o.alive&&!o.targeted).map(o=>o.g),true)[0];throwAt(hit?hit.object.userData.gob:nearest());}
 function restart(){goblins.forEach(o=>o.alive&&scene.remove(o.g));goblins.length=0;hearts=5;score=0;elScore.textContent=0;showHearts();
@@ -570,7 +713,7 @@ function kerstinFrame(t,b,dt){
  if(!(K.state==='in'&&K.r<2.4))stageMeter=Math.min(1,stageMeter+dt*.04);
  elStage.style.width=(stageMeter*100).toFixed(1)+'%';elStage.classList.toggle('low',stageMeter<.35);
  const showK=kRoot.visible&&t<K.sayUntil;kBubble.hidden=!showK;
- if(showK){kv.set(0,2.45,0).applyMatrix4(kRoot.matrixWorld).project(camera);kBubble.style.left=((kv.x+1)/2*innerWidth+18)+'px';kBubble.style.top=((1-kv.y)/2*innerHeight)+'px';}
+ if(showK){kv.set(0,2.45,0).applyMatrix4(kRoot.matrixWorld).project(camera);kBubble.style.left=((kv.x+1)/2*SR.width+SR.left+18)+'px';kBubble.style.top=((1-kv.y)/2*SR.height+SR.top)+'px';}
  if(gnow()<shoveUntil){const ang=Math.atan2(kRoot.position.x,kRoot.position.z);root.rotation.y=ang;
    arms[0].sh.rotation.set(-1.5,0,-.25);arms[1].sh.rotation.set(-1.5,0,.25);arms[0].el.rotation.x=arms[1].el.rotation.x=-.1;spine.rotation.x=.25;}}
 /* ---------- Joker Sammi: black-and-white Shih Tzu, 50 % damage block ---------- */
@@ -612,7 +755,7 @@ function sammiFrame(t,dt){if(!sam.visible){sBubble.hidden=true;return;}
  let pulse=0;SAM.barks.forEach(bt=>{const u=t-bt;if(u>=0&&u<.22)pulse=Math.max(pulse,Math.sin(Math.PI*u/.22));});
  samBody.position.y=moving?.05*Math.abs(Math.sin(t*22)):.06*pulse;samHead.rotation.x=-.5*pulse;samBody.scale.set(1+.06*pulse,1-.08*pulse,1);
  const say=SAM.barks.length&&t>SAM.barks[0]&&t<SAM.barks[2]+.7;sBubble.hidden=!say;
- if(say){sv.set(0,.85,0).applyMatrix4(sam.matrixWorld).project(camera);sBubble.style.left=((sv.x+1)/2*innerWidth+14)+'px';sBubble.style.top=((1-sv.y)/2*innerHeight)+'px';}}
+ if(say){sv.set(0,.85,0).applyMatrix4(sam.matrixWorld).project(camera);sBubble.style.left=((sv.x+1)/2*SR.width+SR.left+14)+'px';sBubble.style.top=((1-sv.y)/2*SR.height+SR.top)+'px';}}
 
 /* ---------- level-ups: every 50 points Robi from Beham comes and takes out a goblin ---------- */
 let level=1,nextLevelAt=50;
@@ -660,7 +803,7 @@ function robiFrame(t,b,dt){
   rRoot.position.addScaledVector(rv,Math.min(1,6*dt/d));rRoot.lookAt(R_ENTRY.x,0,R_ENTRY.z);target=runPose(t);}
  if(target){const a=1-Math.exp(-dt*16);for(const k in target)rShown[k]+=(target[k]-rShown[k])*a;apply(rShown,ROBI);}
  const show=t<RB.sayUntil;rBubble.hidden=!show;
- if(show){rTmp.set(0,2.5,0).applyMatrix4(rRoot.matrixWorld).project(camera);rBubble.style.left=((rTmp.x+1)/2*innerWidth+18)+'px';rBubble.style.top=((1-rTmp.y)/2*innerHeight)+'px';}}
+ if(show){rTmp.set(0,2.5,0).applyMatrix4(rRoot.matrixWorld).project(camera);rBubble.style.left=((rTmp.x+1)/2*SR.width+SR.left+18)+'px';rBubble.style.top=((1-rTmp.y)/2*SR.height+SR.top)+'px';}}
 
 /* ---------- 100 points: Menei arrives with his Christine, her scream kills every goblin ---------- */
 function makeChar(o){const r=root.clone(true),legSet=new Set();['lp0','lp1'].forEach(n=>r.getObjectByName(n).traverse(x=>legSet.add(x)));const h=r.getObjectByName('hips');
@@ -686,7 +829,7 @@ function charTo(c,target,dt,t){mcV.subVectors(target,c.r.position);mcV.y=0;const
  if(d>.05){c.r.position.addScaledVector(mcV,Math.min(1,5.5*dt/d));c.r.lookAt(target.x,0,target.z);charPose(c,runPose(t+(c===CHR?.3:0)),dt);return false;}return true;}
 function charPose(c,p,dt){const a=1-Math.exp(-dt*16);for(const k in p)c.shown[k]+=(p[k]-c.shown[k])*a;apply(c.shown,c.rig);}
 function bubbleAt(el,c,txt,y){el.textContent=txt;el.hidden=false;mcV.set(0,y,0).applyMatrix4(c.r.matrixWorld).project(camera);
- el.style.left=((mcV.x+1)/2*innerWidth+18)+'px';el.style.top=((1-mcV.y)/2*innerHeight)+'px';}
+ el.style.left=((mcV.x+1)/2*SR.width+SR.left+18)+'px';el.style.top=((1-mcV.y)/2*SR.height+SR.top)+'px';}
 function screamSound(){if(!soundOn)return;const a=ac.currentTime,g=ac.createGain(),lfo=ac.createOscillator(),lg=ac.createGain(),f=ac.createBiquadFilter();
  f.type='lowpass';f.frequency.value=4200;g.gain.setValueAtTime(.0001,a);g.gain.exponentialRampToValueAtTime(.55,a+.08);g.gain.setValueAtTime(.55,a+1.1);g.gain.exponentialRampToValueAtTime(.001,a+1.6);
  lfo.frequency.value=7;lg.gain.value=45;lfo.connect(lg);f.connect(g);g.connect(master);
@@ -728,12 +871,14 @@ let last=gnow(),introDone=false,saidCycle=-1;const head3=new THREE.Vector3(),bub
 function speak(){if(!soundOn||!window.speechSynthesis)return;try{const u=new SpeechSynthesisUtterance('Salzburg!');u.lang='de-AT';u.pitch=1.5;u.rate=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}const look=new THREE.Vector3();
 function frame(){requestAnimationFrame(frame);
  if(paused){renderer.render(scene,camera);return;}
- const now=gnow(),dt=Math.min(.05,(now-last)/1000);last=now;const t=(now-t0)/1000,b=t*BPM/60,ph=b*TAU,dip=(1+Math.cos(ph))/2;
+ const now=gnow(),dt=Math.min(.05,(now-last)/1000);
+ if(camV[0]||camV[1]){yawU-=camV[0]*dt*1.8;zoomU=Math.max(-3,Math.min(8,zoomU+camV[1]*dt*5));}last=now;const t=(now-t0)/1000,b=t*BPM/60,ph=b*TAU,dip=(1+Math.cos(ph))/2;
  const m=(Math.floor(b/8)+offset)%MOVES.length,local=b%8;
  if(m!==lastMove){lastMove=m;spinBase=Math.round(spin/TAU)*TAU;elName.textContent=MOVES[m][0];elText.textContent=MOVES[m][1];}
  const target=pose(m,b),a=1-Math.exp(-dt*14);for(const k in target)shown[k]+=(target[k]-shown[k])*a;
  const spinT=m===2?spinBase+2*TAU*sm(0,8,local):Math.round(spin/TAU)*TAU;spin+=(spinT-spin)*(1-Math.exp(-dt*10));
  apply(shown);root.rotation.y=spin;bobFrame(m,b,t,dt);fight(t,dt);kerstinFrame(t,b,dt);sammiFrame(t,dt);robiFrame(t,b,dt);mcFrame(t,b,dt);
+ if((K.state==='in')!==bPush){bPush=!bPush;padBLabel.textContent=bPush?'Drängen':'Rolle';padB.classList.toggle('alert',bPush);padB.setAttribute('aria-label',bPush?'B: Kerstin zurückdrängen':'B: Bob rollt');}
  // world pulses on the beat
  ring.scale.setScalar(1+.06*dip);ring.material.opacity=.45+.5*dip;disc.material.opacity=.1+.14*dip;floorGlow.intensity=.6+1.4*dip;
  floorGlow.color.setHSL((b/16)%1,.8,.6);
@@ -749,7 +894,7 @@ function frame(){requestAnimationFrame(frame);
  if(!introDone&&t>3.2){intro.style.opacity=0;introDone=true;}
  elBeat.textContent=Math.floor(b);elCombo.textContent='×'+(1+Math.floor(local))*(m===2?2:1);
  const say=m===4&&local>=3&&local<7.6;bubble.hidden=!say;
- if(say){head3.set(0,2.35+root.position.y,0).project(camera);bubble.style.left=((head3.x+1)/2*innerWidth+18)+'px';bubble.style.top=((1-head3.y)/2*innerHeight)+'px';
+ if(say){head3.set(0,2.35+root.position.y,0).project(camera);bubble.style.left=((head3.x+1)/2*SR.width+SR.left+18)+'px';bubble.style.top=((1-head3.y)/2*SR.height+SR.top)+'px';
    const cyc=Math.floor(b/8);if(cyc!==saidCycle){saidCycle=cyc;speak();}}
  renderer.render(scene,camera);}
 requestAnimationFrame(frame);

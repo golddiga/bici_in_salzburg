@@ -23,6 +23,12 @@ three.js (r128) kommt vom CDN.
 | M | Sound an/aus |
 | P / Esc / Pause-Button | Pause an/aus (auch automatisch beim Tab-Wechsel) |
 
+**Game-Boy-Modus:** Auf Handys und Tablets startet das Spiel als Handheld: im Hochformat oben der Bildschirm,
+unten Steuerkreuz (Kamera drehen/zoomen), **A** = Mozartkugel werfen, **B** = Bob rollt bzw. Kerstin zurückdrängen
+(leuchtet, sobald sie kommt), dazu Sound, Move und Pause. Im Querformat liegen die Tasten am Rand über der Szene.
+Der Button **Klassisch / Game-Boy-Modus** schaltet jederzeit um; die Wahl merkt sich der Browser.
+Pfeiltasten drehen und zoomen die Kamera auch am Desktop.
+
 Moves: Hüftschwung, Klatschen, Pirouette, Disco-Finger, Salzburg-Hüpfer.
 Joker **Sammi**, ein schwarz-weißer Shih Tzu: Würde Bici Schaden nehmen, rennt er herbei und
 bellt laut. Mit 50 % Chance verbellt er den Goblin und der Schaden fällt weg, sonst passiert nichts.
