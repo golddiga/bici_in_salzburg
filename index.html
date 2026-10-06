@@ -56,6 +56,16 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .bubble{position:fixed;left:0;top:0;pointer-events:none;font-family:var(--display);font-size:clamp(20px,3.6vw,30px);color:var(--night);background:var(--ink);padding:10px 18px;border-radius:18px;box-shadow:4px 4px 0 var(--rose);transform:translate(-50%,-100%);transition:opacity .2s}
 .bubble::after{content:'';position:absolute;left:28%;bottom:-12px;border:8px solid transparent;border-top:10px solid var(--ink);border-bottom:0}
 .err{position:fixed;inset:0;display:grid;place-items:center;padding-inline:16px;text-align:center;color:var(--mist)}
+.bar{display:inline-block;width:84px;height:10px;border-radius:99px;background:rgba(255,255,255,.15);overflow:hidden;vertical-align:middle}
+.bar i{display:block;height:100%;width:100%;background:var(--gold);border-radius:inherit;transition:background .3s}
+.bar i.low{background:var(--rose)}
+.bubble.rival{background:#e9defa;box-shadow:4px 4px 0 #2a9d8f}
+.bubble.rival::after{border-top-color:#e9defa}
+.banner{position:fixed;left:50%;top:calc(16px + env(safe-area-inset-top,0px));transform:translateX(-50%);max-width:min(460px,calc(100% - 32px));text-align:center;
+  background:#5b3a8c;color:var(--ink);font-weight:900;padding:10px 16px;border-radius:12px;box-shadow:0 3px 0 #2a9d8f;pointer-events:none;animation:pulse 1s ease-in-out infinite alternate}
+@keyframes pulse{to{transform:translateX(-50%) scale(1.04)}}
+button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
+@media (max-width:560px){.banner{top:auto;bottom:210px}}
 .hearts{color:var(--rose)!important;letter-spacing:.05em}
 .flash{position:fixed;inset:0;pointer-events:none;background:#ff2848;opacity:0}
 .over{position:fixed;inset:0;display:grid;place-items:center;padding-inline:16px;background:rgba(10,8,24,.55);z-index:5}
@@ -73,7 +83,9 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 
 <div class="bubble" id="bubble" hidden>Salzburg!</div>
 <div class="flash" id="flash"></div>
-<div class="over" id="over" hidden><div class="card"><div class="logo">GAME OVER</div><p>Die Goblins haben den Residenzplatz erobert.<br>Besiegt: <b id="overScore">0</b> Goblins</p><button id="againBtn" type="button">Nochmal</button></div></div>
+<div class="bubble rival" id="kbubble" hidden></div>
+<div class="banner" id="banner" hidden>Kerstin will die Tanzfläche! Tippe sie an oder drücke K, um sie zurückzudrängen.</div>
+<div class="over" id="over" hidden><div class="card"><div class="logo">GAME OVER</div><p><span id="overMsg">Die Goblins haben den Residenzplatz erobert.</span><br>Punkte: <b id="overScore">0</b></p><button id="againBtn" type="button">Nochmal</button></div></div>
 <div class="hud">
   <div class="row">
     <div>
@@ -82,7 +94,8 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
       <div class="sub">Tanznacht in Salzburg · feat. Bob</div>
     </div>
     <div class="stats" aria-live="off">
-      <span>Goblins</span><b id="score">0</b>
+      <span>Punkte</span><b id="score">0</b>
+      <span>Bühne</span><b><i class="bar"><i id="stageBar"></i></i></b>
       <span>Leben</span><b id="hearts" class="hearts">♥♥♥♥♥</b>
       <span class="opt">Beat</span><b class="opt" id="beat">0</b>
       <span class="opt">Combo</span><b class="opt" id="combo">×1</b>
@@ -100,8 +113,9 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
         <button class="ghost" id="nextBtn" type="button">Nächster Move</button>
         <button class="ghost" id="rollBtn" type="button">Bob: Rolle!</button>
         <button id="throwBtn" type="button">Mozartkugel werfen</button>
+        <button class="push" id="pushBtn" type="button" hidden>Zurückdrängen</button>
       </div>
-      <div class="hint">Goblins antippen oder F · R = Bob rollt · Leertaste = Move · M = Sound</div>
+      <div class="hint">Goblins antippen oder F · Kerstin antippen oder K · R = Bob rollt · Leertaste = Move · M = Sound</div>
     </div>
   </div>
 </div>
@@ -279,6 +293,12 @@ const arms=[1,-1].map(s=>{const sh=new THREE.Group();sh.position.set(.36*s,.45,0
   sh.add(limb(.085,.075,.3,skin));const el=new THREE.Group();el.position.y=-.3;sh.add(el);el.add(limb(.072,.06,.27,skin));
   const hd=ball(.07,skin);hd.position.y=-.3;el.add(hd);return {sh,el};});
 
+hips.name='hips';spine.name='spine';headP.name='headP';skirt.name='skirt';tailP.name='tailP';
+legs.forEach((l,i)=>{l.p.name='lp'+i;l.knee.name='kn'+i;l.ank.name='an'+i;});arms.forEach((a,i)=>{a.sh.name='sh'+i;a.el.name='el'+i;});
+const BICI={root,hips,legs,spine,headP,arms,skirt,tailP};
+function rigOf(r){const g=n=>r.getObjectByName(n);return {root:r,hips:g('hips'),spine:g('spine'),headP:g('headP'),skirt:g('skirt'),tailP:g('tailP'),
+ legs:[0,1].map(i=>({p:g('lp'+i),knee:g('kn'+i),ank:g('an'+i)})),arms:[0,1].map(i=>({sh:g('sh'+i),el:g('el'+i)}))};}
+
 /* ---------- Residenzbrunnen ---------- */
 const wd=[],NW=140;
 {const st=M(0xd9d0c0,{map:plaster,bumpMap:plaster,bumpScale:.03}),wat=M(0x2c4f6e,{metalness:.6,roughness:.08});
@@ -354,12 +374,12 @@ function pose(m,b){const ph=b*TAU,dip=(1+Math.cos(ph))/2,sway=Math.sin(ph/2);
    rSz:-2.4*u+.45*(1-u),rSx:-.5*(1-u),rE:-.1,lSz:.75,lSx:.35,lE:-1.5,kL:.12+.28*dip,kR:.12+.28*dip,tz:-.4*s2});}
  return p;}
 const shown=pose(0,0);let spin=0,spinBase=0,lastMove=-1,offset=0;
-function apply(p){const k=(p.kL+p.kR)/2;
- hips.position.set(p.hx,HIP-.66*(1-Math.cos(k)),0);hips.rotation.set(0,p.hry,p.hrz);
- legs.forEach((l,i)=>{const kk=i?p.kR:p.kL;l.p.rotation.set(-kk,0,-p.hrz);l.knee.rotation.x=2*kk;l.ank.rotation.x=-kk;});
- spine.rotation.set(p.sx,0,p.sz);headP.rotation.set(p.hdx,0,p.hdz);
- arms[0].sh.rotation.set(p.lSx,0,p.lSz);arms[0].el.rotation.x=p.lE;arms[1].sh.rotation.set(p.rSx,0,p.rSz);arms[1].el.rotation.x=p.rE;
- skirt.scale.set(p.flare,1,p.flare);root.position.y=p.jump;tailP.rotation.set(.25,0,p.tz);}
+function apply(p,R=BICI){const k=(p.kL+p.kR)/2;
+ R.hips.position.set(p.hx,HIP-.66*(1-Math.cos(k)),0);R.hips.rotation.set(0,p.hry,p.hrz);
+ R.legs.forEach((l,i)=>{const kk=i?p.kR:p.kL;l.p.rotation.set(-kk,0,-p.hrz);l.knee.rotation.x=2*kk;l.ank.rotation.x=-kk;});
+ R.spine.rotation.set(p.sx,0,p.sz);R.headP.rotation.set(p.hdx,0,p.hdz);
+ R.arms[0].sh.rotation.set(p.lSx,0,p.lSz);R.arms[0].el.rotation.x=p.lE;R.arms[1].sh.rotation.set(p.rSx,0,p.rSz);R.arms[1].el.rotation.x=p.rE;
+ R.skirt.scale.set(p.flare,1,p.flare);R.root.position.y=p.jump;R.tailP.rotation.set(.25,0,p.tz);}
 
 /* ---------- camera control ---------- */
 let yawU=0,pitchU=0,zoomU=0,drag=null;
@@ -395,7 +415,8 @@ function toggleSound(){
 const soundBtn=document.getElementById('soundBtn');soundBtn.addEventListener('click',toggleSound);
 function nextMove(){offset++;}
 document.getElementById('nextBtn').addEventListener('click',nextMove);
-addEventListener('keydown',e=>{if(e.code==='Space'&&e.target.tagName!=='BUTTON'){e.preventDefault();nextMove();}if(e.key==='m'||e.key==='M')toggleSound();if(e.key==='f'||e.key==='F')throwAt(nearest());if(e.key==='r'||e.key==='R')bobRolle();});
+addEventListener('keydown',e=>{if(e.code==='Space'&&e.target.tagName!=='BUTTON'){e.preventDefault();nextMove();}if(e.key==='m'||e.key==='M')toggleSound();if(e.key==='f'||e.key==='F')throwAt(nearest());if(e.key==='r'||e.key==='R')bobRolle();if(e.key==='k'||e.key==='K')kPush();});
+document.getElementById('pushBtn').addEventListener('click',()=>kPush());
 document.getElementById('rollBtn').addEventListener('click',bobRolle);
 document.getElementById('throwBtn').addEventListener('click',()=>throwAt(nearest()));
 document.getElementById('againBtn').addEventListener('click',()=>restart());
@@ -437,15 +458,16 @@ function throwAt(o){if(gameOver||!o||!o.alive||o.targeted)return;o.targeted=true
  const m=new THREE.Mesh(new THREE.SphereGeometry(.11,16,12),kugelM);m.castShadow=true;scene.add(m);
  shots.push({m,o,t:0,from:new THREE.Vector3(-.4,1.6,.2).applyAxisAngle(UP,root.rotation.y)});sfx('throw');}
 function clickAt(x,y){if(gameOver)return;ndc.set(x/innerWidth*2-1,-(y/innerHeight)*2+1);raycaster.setFromCamera(ndc,camera);
+ if(K.state==='in'&&raycaster.intersectObject(kRoot,true).length){kPush();return;}
  const hit=raycaster.intersectObjects(goblins.filter(o=>o.alive&&!o.targeted).map(o=>o.g),true)[0];throwAt(hit?hit.object.userData.gob:nearest());}
 function restart(){goblins.forEach(o=>o.alive&&scene.remove(o.g));goblins.length=0;hearts=5;score=0;elScore.textContent=0;showHearts();
- gameOver=false;overEl.hidden=true;nextSpawn=(performance.now()-t0)/1000+3;}
+ gameOver=false;overEl.hidden=true;nextSpawn=(performance.now()-t0)/1000+3;resetKerstin((performance.now()-t0)/1000);}
 function fight(t,dt){
  if(!gameOver&&t>nextSpawn){spawn();nextSpawn+=5;}
  const tmp=new THREE.Vector3();
  goblins.forEach(o=>{if(!o.alive)return;const p=o.g.position,d=Math.hypot(p.x,p.z);
   if(d<1.3){kill(o,false);hearts--;showHearts();sfx('hit');flashEl.animate([{opacity:.45},{opacity:0}],{duration:450});
-    if(hearts<=0){gameOver=true;document.getElementById('overScore').textContent=score;overEl.hidden=false;}return;}
+    if(hearts<=0)endGame('Die Goblins haben den Residenzplatz erobert.');return;}
   if(!gameOver){p.x-=p.x/d*o.speed*dt;p.z-=p.z/d*o.speed*dt;}
   p.y=.07*Math.abs(Math.sin(t*10+o.ph));o.g.lookAt(0,p.y,0);o.g.rotateZ(.12*Math.sin(t*10+o.ph));
   o.arm.rotation.x=d<3.5?-1.4+.9*Math.sin(t*9+o.ph):-.3+.3*Math.sin(t*10+o.ph);});
@@ -459,6 +481,52 @@ function fight(t,dt){
 
 
 const elBeat=document.getElementById('beat'),elCombo=document.getElementById('combo'),elName=document.getElementById('moveName'),elText=document.getElementById('moveText'),intro=document.getElementById('intro');
+/* ---------- Kerstin, the sister who wants the dance floor ---------- */
+const kHair=M(0xb3843f,{roughness:.5}),kBodice=M(0x5b3a8c,{roughness:.6}),kSkirt=M(0x2a9d8f,{side:THREE.DoubleSide,roughness:.7}),kApron=M(0xf2c14e,{side:THREE.DoubleSide,roughness:.7});
+const swap=new Map([[hairM,kHair],[bodice,kBodice],[skirtM,kSkirt],[apronM,kApron]]);
+const kRoot=root.clone(true);kRoot.traverse(o=>{if(o.isMesh&&swap.has(o.material))o.material=swap.get(o.material);});
+kRoot.scale.setScalar(1.04);kRoot.visible=false;scene.add(kRoot);
+const KER=rigOf(kRoot);
+{const sg=M(0x111111,{metalness:.6,roughness:.2});[1,-1].forEach(s=>{const g=new THREE.Mesh(new THREE.BoxGeometry(.1,.055,.02),sg);g.position.set(.085*s,.255,.235);KER.headP.add(g);});
+ const br=new THREE.Mesh(new THREE.BoxGeometry(.08,.015,.015),sg);br.position.set(0,.265,.24);KER.headP.add(br);}
+const kShown=pose(0,0);
+const K={state:'off',r:10,a:0,vel:0,next:20,level:0,say:'',sayUntil:0,staggerUntil:0};
+let stageMeter=1,shoveUntil=0;
+const elStage=document.getElementById('stageBar'),kBubble=document.getElementById('kbubble'),banner=document.getElementById('banner'),pushBtn=document.getElementById('pushBtn');
+function kSay(txt,t,d){K.say=txt;K.sayUntil=t+d;kBubble.textContent=txt;}
+function kArrive(t){Object.assign(K,{state:'in',r:10.5,a:(rnd()-.5)*2.2,vel:0});kRoot.visible=true;banner.hidden=false;pushBtn.hidden=false;
+ kSay(['Jetzt tanz ICH!','Platz da, Schwesterherz!','Die Bühne gehört mir!'][K.level%3],t,2.6);
+ if(soundOn){const a=ac.currentTime;tone('square',523,a,.12,.07,3000);tone('square',659,a+.12,.12,.07,3000);tone('square',784,a+.24,.25,.07,3000);}}
+function kPush(){if(gameOver||K.state!=='in')return;const t=(performance.now()-t0)/1000;K.vel+=5.5;K.staggerUntil=t+.45;shoveUntil=performance.now()+280;
+ if(rnd()<.35)kSay(['Hey!','Uff!','Lass das!','Mama!!'][Math.floor(rnd()*4)],t,1);
+ if(soundOn){const a=ac.currentTime;tone('sine',95,a,.22,.55);noise(a,.08,.2,'lowpass',900);}}
+function resetKerstin(t){Object.assign(K,{state:'off',next:t+15,level:0,sayUntil:0});kRoot.visible=false;banner.hidden=true;pushBtn.hidden=true;stageMeter=1;}
+function kerstinFrame(t,b,dt){
+ if(!gameOver&&K.state==='off'&&t>K.next)kArrive(t);
+ if(K.state!=='off'){
+  const stag=t<K.staggerUntil;
+  if(!gameOver){K.r+=K.vel*dt;K.vel*=Math.exp(-dt*4);
+   if(K.state==='in'&&!stag&&K.r>1.05)K.r=Math.max(1.05,K.r-(.85+.15*K.level)*dt);
+   if(K.state==='leaving')K.r+=2.2*dt;}
+  if(K.state==='in'&&K.r>10.5){K.state='leaving';score+=5;elScore.textContent=score;banner.hidden=true;pushBtn.hidden=true;kSay('Na gut … diesmal noch!',t,2.2);}
+  if(K.state==='leaving'&&K.r>17){K.state='off';kRoot.visible=false;K.level++;K.next=t+25;}
+  kRoot.position.set(Math.sin(K.a)*K.r,0,Math.cos(K.a)*K.r);
+  if(K.state==='leaving')kRoot.lookAt(kRoot.position.x*2,0,kRoot.position.z*2);else kRoot.lookAt(0,0,0);
+  const target=pose(K.r<2.4?3:0,b+.5);
+  if(stag)Object.assign(target,{sx:-.5,hdx:-.35,lSz:1.7,rSz:-1.7,lSx:-.6,rSx:-.6,lE:-.3,rE:-.3,kL:.3,kR:.05});
+  const a=1-Math.exp(-dt*14);for(const k in target)kShown[k]+=(target[k]-kShown[k])*a;
+  apply(kShown,KER);
+  if(K.state==='in'&&K.r<2.4&&!gameOver){stageMeter=Math.max(0,stageMeter-dt*.12*(1+.25*K.level));
+    if(stageMeter<=0)endGame('Kerstin hat die Tanzfläche übernommen.');}}
+ if(!(K.state==='in'&&K.r<2.4))stageMeter=Math.min(1,stageMeter+dt*.04);
+ elStage.style.width=(stageMeter*100).toFixed(1)+'%';elStage.classList.toggle('low',stageMeter<.35);
+ const showK=kRoot.visible&&t<K.sayUntil;kBubble.hidden=!showK;
+ if(showK){kv.set(0,2.45,0).applyMatrix4(kRoot.matrixWorld).project(camera);kBubble.style.left=((kv.x+1)/2*innerWidth+18)+'px';kBubble.style.top=((1-kv.y)/2*innerHeight)+'px';}
+ if(performance.now()<shoveUntil){const ang=Math.atan2(kRoot.position.x,kRoot.position.z);root.rotation.y=ang;
+   arms[0].sh.rotation.set(-1.5,0,-.25);arms[1].sh.rotation.set(-1.5,0,.25);arms[0].el.rotation.x=arms[1].el.rotation.x=-.1;spine.rotation.x=.25;}}
+const kv=new THREE.Vector3();
+function endGame(msg){gameOver=true;document.getElementById('overMsg').textContent=msg;document.getElementById('overScore').textContent=score;overEl.hidden=false;banner.hidden=true;pushBtn.hidden=true;}
+
 let last=performance.now(),introDone=false,saidCycle=-1;const head3=new THREE.Vector3(),bubble=document.getElementById('bubble');
 function speak(){if(!soundOn||!window.speechSynthesis)return;try{const u=new SpeechSynthesisUtterance('Salzburg!');u.lang='de-AT';u.pitch=1.5;u.rate=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}const look=new THREE.Vector3();
 function frame(now){requestAnimationFrame(frame);
@@ -467,7 +535,7 @@ function frame(now){requestAnimationFrame(frame);
  if(m!==lastMove){lastMove=m;spinBase=Math.round(spin/TAU)*TAU;elName.textContent=MOVES[m][0];elText.textContent=MOVES[m][1];}
  const target=pose(m,b),a=1-Math.exp(-dt*14);for(const k in target)shown[k]+=(target[k]-shown[k])*a;
  const spinT=m===2?spinBase+2*TAU*sm(0,8,local):Math.round(spin/TAU)*TAU;spin+=(spinT-spin)*(1-Math.exp(-dt*10));
- apply(shown);root.rotation.y=spin;bobFrame(m,b,t,dt);fight(t,dt);
+ apply(shown);root.rotation.y=spin;bobFrame(m,b,t,dt);fight(t,dt);kerstinFrame(t,b,dt);
  // world pulses on the beat
  ring.scale.setScalar(1+.06*dip);ring.material.opacity=.45+.5*dip;disc.material.opacity=.1+.14*dip;floorGlow.intensity=.6+1.4*dip;
  floorGlow.color.setHSL((b/16)%1,.8,.6);
