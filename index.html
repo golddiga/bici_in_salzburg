@@ -88,7 +88,10 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
 .over .card{text-align:center;background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:16px;padding:24px 28px;max-width:420px}
 .over .logo{font-size:clamp(36px,8vw,60px)}
 .over p{font-weight:700;line-height:1.5;margin:.6em 0 1.2em}
-@media (max-width:560px){.stats .opt{display:none}.hint{display:none}.logo{font-size:40px}}
+#pauseBtn .pi{display:none}
+@media (max-width:560px){.stats .opt{display:none}.hint{display:none}.logo{font-size:40px}
+  #pauseBtn{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));right:16px;z-index:6;width:48px;height:48px;padding:0;display:grid;place-items:center}
+  #pauseBtn .pl{display:none}#pauseBtn .pi{display:block;font-size:16px;letter-spacing:0}}
 </style>
 </head>
 <body>
@@ -107,7 +110,7 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
 <div class="bubble scream" id="cbubble" hidden></div>
 <div class="banner" id="banner" hidden>Kerstin will die Tanzfläche! Tippe sie an oder drücke K, um sie zurückzudrängen.</div>
 <div class="over" id="over" hidden><div class="card"><div class="logo">GAME OVER</div><p><span id="overMsg">Die Goblins haben den Residenzplatz erobert.</span><br>Punkte: <b id="overScore">0</b></p><button id="againBtn" type="button">Nochmal</button></div></div>
-<div class="over" id="pauseEl" hidden><div class="card"><div class="logo">PAUSE</div><p>Bici verschnauft kurz. Die Goblins warten.</p><button id="resumeBtn" type="button">Weiter</button></div></div>
+<div class="over" id="pauseEl" hidden><div class="card"><div class="logo">PAUSE</div><p>Bici verschnauft kurz. Die Goblins warten.<br><small>Tippen zum Weiterspielen</small></p><button id="resumeBtn" type="button">Weiter</button></div></div>
 <div class="hud">
   <div class="row">
     <div>
@@ -133,7 +136,7 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
     </div>
     <div>
       <div class="controls">
-        <button class="ghost" id="pauseBtn" type="button">Pause</button>
+        <button class="ghost" id="pauseBtn" type="button" aria-label="Pause"><span class="pi" aria-hidden="true">❚❚</span><span class="pl">Pause</span></button>
         <button class="ghost" id="soundBtn" type="button">Sound an</button>
         <button class="ghost" id="nextBtn" type="button">Nächster Move</button>
         <button class="ghost" id="rollBtn" type="button">Bob: Rolle!</button>
@@ -446,6 +449,7 @@ document.getElementById('rollBtn').addEventListener('click',bobRolle);
 document.getElementById('throwBtn').addEventListener('click',()=>throwAt(nearest()));
 document.getElementById('pauseBtn').addEventListener('click',()=>togglePause());
 document.getElementById('resumeBtn').addEventListener('click',()=>togglePause(false));
+document.getElementById('pauseEl').addEventListener('click',e=>{if(e.target.id==='pauseEl')togglePause(false);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)togglePause(true);});
 document.getElementById('againBtn').addEventListener('click',()=>restart());
 
@@ -717,8 +721,8 @@ const pauseEl=document.getElementById('pauseEl'),pauseBtn=document.getElementByI
 function togglePause(want=!paused){if(want===paused||(want&&gameOver))return;paused=want;
  if(paused){pauseAt=performance.now();if(ac&&soundOn)ac.suspend();if(window.speechSynthesis)speechSynthesis.cancel();}
  else{pausedMs+=performance.now()-pauseAt;if(ac&&soundOn)ac.resume();}
- document.getAnimations().forEach(a=>paused?a.pause():a.play());
- pauseEl.hidden=!paused;pauseBtn.textContent=paused?'Weiter':'Pause';if(paused)document.getElementById('resumeBtn').focus();}
+ if(document.getAnimations)document.getAnimations().forEach(a=>paused?a.pause():a.play());
+ pauseEl.hidden=!paused;pauseBtn.querySelector('.pl').textContent=paused?'Weiter':'Pause';pauseBtn.querySelector('.pi').textContent=paused?'▶':'❚❚';pauseBtn.setAttribute('aria-label',paused?'Weiter':'Pause');if(paused)document.getElementById('resumeBtn').focus();}
 
 let last=gnow(),introDone=false,saidCycle=-1;const head3=new THREE.Vector3(),bubble=document.getElementById('bubble');
 function speak(){if(!soundOn||!window.speechSynthesis)return;try{const u=new SpeechSynthesisUtterance('Salzburg!');u.lang='de-AT';u.pitch=1.5;u.rate=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}const look=new THREE.Vector3();
