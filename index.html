@@ -75,6 +75,13 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
 .toast.good{background:var(--gold);box-shadow:0 3px 0 #2a2628}
 .toast.bad{background:#e9e4dc;box-shadow:0 3px 0 var(--rose)}
 @media (max-width:560px){.toast{top:auto;bottom:260px}}
+.bubble.robi{background:#dbe8ff;box-shadow:4px 4px 0 #1f5fbf;font-size:clamp(16px,2.6vw,22px)}
+.bubble.robi::after{border-top-color:#dbe8ff}
+.bubble.menei{background:#e4f0e6;box-shadow:4px 4px 0 #3e6b48;font-size:clamp(14px,2.2vw,19px);max-width:280px}
+.bubble.menei::after{border-top-color:#e4f0e6}
+.bubble.scream{background:#ff7ad9;color:#fff;font-size:clamp(26px,5vw,44px);box-shadow:5px 5px 0 #8e1f3f;animation:shake .08s linear infinite alternate}
+.bubble.scream::after{border-top-color:#ff7ad9}
+@keyframes shake{to{margin-left:4px;margin-top:-3px}}
 .hearts{color:var(--rose)!important;letter-spacing:.05em}
 .flash{position:fixed;inset:0;pointer-events:none;background:#ff2848;opacity:0}
 .over{position:fixed;inset:0;display:grid;place-items:center;padding-inline:16px;background:rgba(10,8,24,.55);z-index:5}
@@ -95,6 +102,9 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
 <div class="bubble rival" id="kbubble" hidden></div>
 <div class="bubble joker" id="sbubble" hidden>WAU! WAU! WAU!</div>
 <div class="toast" id="toast" hidden></div>
+<div class="bubble robi" id="rbubble" hidden></div>
+<div class="bubble menei" id="mbubble" hidden></div>
+<div class="bubble scream" id="cbubble" hidden></div>
 <div class="banner" id="banner" hidden>Kerstin will die Tanzfläche! Tippe sie an oder drücke K, um sie zurückzudrängen.</div>
 <div class="over" id="over" hidden><div class="card"><div class="logo">GAME OVER</div><p><span id="overMsg">Die Goblins haben den Residenzplatz erobert.</span><br>Punkte: <b id="overScore">0</b></p><button id="againBtn" type="button">Nochmal</button></div></div>
 <div class="hud">
@@ -105,6 +115,7 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
       <div class="sub">Tanznacht in Salzburg · feat. Bob</div>
     </div>
     <div class="stats" aria-live="off">
+      <span>Level</span><b id="level">1</b>
       <span>Punkte</span><b id="score">0</b>
       <span>Joker</span><b class="joker">Sammi 50 %</b>
       <span>Bühne</span><b><i class="bar"><i id="stageBar"></i></i></b>
@@ -455,7 +466,7 @@ function makeGoblin(){const g=new THREE.Group();
  const l2=limb(.045,.04,.26,gobSkin);l2.position.set(-.24,.58,0);l2.rotation.z=-.3;g.add(l2);
  g.scale.setScalar(1.15);return {g,arm};}
 function spawn(){for(let i=0;i<3;i++){const o=makeGoblin(),a=rnd()*TAU,r=11+rnd()*2;o.g.position.set(Math.sin(a)*r,0,Math.cos(a)*r);
-  Object.assign(o,{alive:true,ph:rnd()*TAU,speed:1.2+rnd()*.6});o.g.traverse(c=>c.userData.gob=o);scene.add(o.g);goblins.push(o);}}
+  Object.assign(o,{alive:true,ph:rnd()*TAU,speed:(1.2+rnd()*.6)*(1+.1*(level-1))});o.g.traverse(c=>c.userData.gob=o);scene.add(o.g);goblins.push(o);}}
 function poof(pos,col){const parts=[];for(let i=0;i<16;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.07,6,4),B(col,{transparent:true}));
   m.position.copy(pos);m.position.y+=.7;scene.add(m);parts.push([m,new THREE.Vector3(rnd()-.5,rnd()*1.2,rnd()-.5).multiplyScalar(4)]);}bursts.push({parts,t:0});}
 function sfx(k){if(!soundOn)return;const t=ac.currentTime;
@@ -473,7 +484,7 @@ function clickAt(x,y){if(gameOver)return;ndc.set(x/innerWidth*2-1,-(y/innerHeigh
  if(K.state==='in'&&raycaster.intersectObject(kRoot,true).length){kPush();return;}
  const hit=raycaster.intersectObjects(goblins.filter(o=>o.alive&&!o.targeted).map(o=>o.g),true)[0];throwAt(hit?hit.object.userData.gob:nearest());}
 function restart(){goblins.forEach(o=>o.alive&&scene.remove(o.g));goblins.length=0;hearts=5;score=0;elScore.textContent=0;showHearts();
- gameOver=false;overEl.hidden=true;nextSpawn=(performance.now()-t0)/1000+3;resetKerstin((performance.now()-t0)/1000);sam.visible=false;SAM.until=-1;}
+ gameOver=false;overEl.hidden=true;nextSpawn=(performance.now()-t0)/1000+3;resetKerstin((performance.now()-t0)/1000);sam.visible=false;SAM.until=-1;robiReset();mcReset();}
 function fight(t,dt){
  if(!gameOver&&t>nextSpawn){spawn();nextSpawn+=5;}
  const tmp=new THREE.Vector3();
@@ -592,6 +603,107 @@ function sammiFrame(t,dt){if(!sam.visible){sBubble.hidden=true;return;}
  const say=SAM.barks.length&&t>SAM.barks[0]&&t<SAM.barks[2]+.7;sBubble.hidden=!say;
  if(say){sv.set(0,.85,0).applyMatrix4(sam.matrixWorld).project(camera);sBubble.style.left=((sv.x+1)/2*innerWidth+14)+'px';sBubble.style.top=((1-sv.y)/2*innerHeight)+'px';}}
 
+/* ---------- level-ups: every 50 points Robi from Beham comes and takes out a goblin ---------- */
+let level=1,nextLevelAt=50;
+const elLevel=document.getElementById('level'),rBubble=document.getElementById('rbubble');
+const rFlannel=M(0xc0392b,{roughness:.8}),rJeans=M(0x2f4f7f,{roughness:.85}),rHair=M(0x4a3424,{roughness:.5}),rCap=M(0x1f5fbf,{roughness:.6});
+const rRoot=root.clone(true);
+{const legNodes=new Set();['lp0','lp1'].forEach(n=>rRoot.getObjectByName(n).traverse(o=>legNodes.add(o)));const rh=rRoot.getObjectByName('hips');
+ rRoot.traverse(o=>{if(!o.isMesh)return;
+  if(legNodes.has(o)&&o.material===skin)o.material=rJeans;
+  else if(o.parent===rh&&o.material===bodice)o.material=rJeans;
+  else if(o.material===bodice||o.material===blouse)o.material=rFlannel;
+  else if(o.material===hairM){if(o.scale.y>1.5)o.visible=false;else o.material=rHair;}});}
+rRoot.getObjectByName('skirt').visible=false;rRoot.getObjectByName('tailP').visible=false;
+const ROBI=rigOf(rRoot);
+{const c=new THREE.Mesh(new THREE.SphereGeometry(.28,24,12,0,TAU,0,Math.PI/2),rCap);c.position.y=.27;c.castShadow=true;ROBI.headP.add(c);
+ const br=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,.025,20),rCap);br.scale.z=1.25;br.position.set(0,.29,.22);ROBI.headP.add(br);}
+rRoot.scale.setScalar(1.1);rRoot.visible=false;scene.add(rRoot);
+const rShown=pose(0,0),RB={state:'off',target:null,until:0,strikeT:0,hit:false,say:'',sayUntil:0},rv=new THREE.Vector3(),rTmp=new THREE.Vector3();
+const R_ENTRY=new THREE.Vector3(9,0,9);
+function rSay(txt,t,d){RB.say=txt;RB.sayUntil=t+d;rBubble.textContent=txt;}
+function levelUp(t){level++;elLevel.textContent=level;toast('LEVEL '+level+'! Robi aus Beham kommt zu Hilfe!',true);
+ if(soundOn){const a=ac.currentTime;[523,659,784,1047].forEach((f,i)=>tone('square',f,a+i*.1,.18,.08,3500));}
+ if(RB.state==='off'){rRoot.visible=true;rRoot.position.copy(R_ENTRY);}
+ Object.assign(RB,{state:'in',target:null,until:t+8,hit:false});rSay('Servus! Robi aus Beham!',t,2.2);}
+function robiReset(){level=1;nextLevelAt=50;elLevel.textContent=1;RB.state='off';rRoot.visible=false;rBubble.hidden=true;}
+function runPose(t){const s=Math.sin(t*14);const p=pose(0,0);
+ return Object.assign(p,{hx:0,hrz:0,sz:0,hdz:0,sx:.22,kL:.15+.55*Math.max(0,s),kR:.15+.55*Math.max(0,-s),lSx:.7*s,rSx:-.7*s,lSz:.15,rSz:-.15,lE:-.6,rE:-.6,tz:0});}
+function robiFrame(t,b,dt){
+ while(!gameOver&&score>=nextLevelAt){nextLevelAt+=50;levelUp(t);}
+ if(RB.state==='off'){rBubble.hidden=true;return;}
+ let target=null;
+ if(RB.state==='in'){
+  if(!RB.target||!RB.target.alive)RB.target=nearest()||goblins.find(o=>o.alive)||null;
+  if(RB.target){rTmp.copy(RB.target.g.position);rTmp.y=0;rv.subVectors(rTmp,rRoot.position);const d=rv.length();
+    if(d<.9){RB.state='strike';RB.strikeT=t;RB.hit=false;}else rRoot.position.addScaledVector(rv,Math.min(1,6*dt/d));
+    rRoot.lookAt(rTmp.x,0,rTmp.z);target=runPose(t);}
+  else if(t>RB.until){RB.state='party';RB.until=t+2.5;rSay('Keine Goblins? Dann tanz ma!',t,2);}
+  else target=pose(1,b);}
+ if(RB.state==='strike'){const u=t-RB.strikeT;target=pose(0,0);Object.assign(target,{rSx:-1.65,rSz:-.1,rE:0,lSx:.5,lE:-.8,sx:.25,hry:-.3,kL:.3,kR:.1});
+  if(!RB.hit&&u>.18){RB.hit=true;if(RB.target&&RB.target.alive){kill(RB.target,false,0x5ab4ff);if(soundOn){const a=ac.currentTime;tone('sine',80,a,.25,.6);noise(a,.1,.3,'lowpass',1200);}}rSay('Erledigt!',t,1.6);}
+  if(u>.5){RB.state='party';RB.until=t+2.5;}}
+ if(RB.state==='party'){rRoot.lookAt(0,0,0);target=pose(1,b);if(t>RB.until)RB.state='out';}
+ if(RB.state==='out'){rv.subVectors(R_ENTRY,rRoot.position);rv.y=0;const d=rv.length();
+  if(d<.1){RB.state='off';rRoot.visible=false;rBubble.hidden=true;return;}
+  rRoot.position.addScaledVector(rv,Math.min(1,6*dt/d));rRoot.lookAt(R_ENTRY.x,0,R_ENTRY.z);target=runPose(t);}
+ if(target){const a=1-Math.exp(-dt*16);for(const k in target)rShown[k]+=(target[k]-rShown[k])*a;apply(rShown,ROBI);}
+ const show=t<RB.sayUntil;rBubble.hidden=!show;
+ if(show){rTmp.set(0,2.5,0).applyMatrix4(rRoot.matrixWorld).project(camera);rBubble.style.left=((rTmp.x+1)/2*innerWidth+18)+'px';rBubble.style.top=((1-rTmp.y)/2*innerHeight)+'px';}}
+
+/* ---------- 100 points: Menei arrives with his Christine, her scream kills every goblin ---------- */
+function makeChar(o){const r=root.clone(true),legSet=new Set();['lp0','lp1'].forEach(n=>r.getObjectByName(n).traverse(x=>legSet.add(x)));const h=r.getObjectByName('hips');
+ r.traverse(x=>{if(!x.isMesh)return;const m=x.material;
+  if(o.pants&&legSet.has(x)&&m===skin)x.material=o.pants;
+  else if(o.pants&&x.parent===h&&m===bodice)x.material=o.pants;
+  else if(m===bodice)x.material=o.top;
+  else if(m===blouse)x.material=o.blouse||o.top;
+  else if(m===hairM){if(o.pants&&x.scale.y>1.5)x.visible=false;else x.material=o.hair;}
+  else if(m===skirtM&&o.skirt)x.material=o.skirt;else if(m===apronM&&o.apron)x.material=o.apron;});
+ if(o.pants){r.getObjectByName('skirt').visible=false;r.getObjectByName('tailP').visible=false;}
+ r.scale.setScalar(o.scale||1);r.visible=false;scene.add(r);return {r,rig:rigOf(r),shown:pose(0,0)};}
+const MEN=makeChar({pants:M(0x55585e),top:M(0x3e6b48),hair:M(0x9a9a9a),scale:1.12});
+dball(.05,M(0x6e6e6e,{roughness:.8}),1.7,.5,.6,0,.168,.238,MEN.rig.headP);
+const CHR=makeChar({hair:M(0xe2c27a,{roughness:.5}),top:M(0x8e1f3f),blouse:blouse,skirt:M(0x1f3d7a,{side:THREE.DoubleSide}),apron:M(0xf4f1ea,{side:THREE.DoubleSide})});
+const chrMouth=dball(.05,M(0x3a0a12),1,1.25,.5,0,.13,.228,CHR.rig.headP);chrMouth.visible=false;
+const shock=new THREE.Mesh(new THREE.RingGeometry(.92,1,96),B(0xff7ad9,{transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+shock.rotation.x=-Math.PI/2;shock.position.y=.4;shock.visible=false;scene.add(shock);
+const MC={state:'off',t:0,next:100,killed:0};let shakeAmt=0;
+const M_POS=new THREE.Vector3(-3.1,0,-2.4),C_POS=new THREE.Vector3(-2.1,0,-3.1),M_IN=new THREE.Vector3(-12,0,-4),C_IN=new THREE.Vector3(-12.6,0,-5);
+const mBubble=document.getElementById('mbubble'),cBubble=document.getElementById('cbubble'),mcV=new THREE.Vector3();
+function charTo(c,target,dt,t){mcV.subVectors(target,c.r.position);mcV.y=0;const d=mcV.length();
+ if(d>.05){c.r.position.addScaledVector(mcV,Math.min(1,5.5*dt/d));c.r.lookAt(target.x,0,target.z);charPose(c,runPose(t+(c===CHR?.3:0)),dt);return false;}return true;}
+function charPose(c,p,dt){const a=1-Math.exp(-dt*16);for(const k in p)c.shown[k]+=(p[k]-c.shown[k])*a;apply(c.shown,c.rig);}
+function bubbleAt(el,c,txt,y){el.textContent=txt;el.hidden=false;mcV.set(0,y,0).applyMatrix4(c.r.matrixWorld).project(camera);
+ el.style.left=((mcV.x+1)/2*innerWidth+18)+'px';el.style.top=((1-mcV.y)/2*innerHeight)+'px';}
+function screamSound(){if(!soundOn)return;const a=ac.currentTime,g=ac.createGain(),lfo=ac.createOscillator(),lg=ac.createGain(),f=ac.createBiquadFilter();
+ f.type='lowpass';f.frequency.value=4200;g.gain.setValueAtTime(.0001,a);g.gain.exponentialRampToValueAtTime(.55,a+.08);g.gain.setValueAtTime(.55,a+1.1);g.gain.exponentialRampToValueAtTime(.001,a+1.6);
+ lfo.frequency.value=7;lg.gain.value=45;lfo.connect(lg);f.connect(g);g.connect(master);
+ [880,893,1320].forEach(fr=>{const o=ac.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(fr,a);o.frequency.linearRampToValueAtTime(fr*1.25,a+.5);o.frequency.linearRampToValueAtTime(fr*1.1,a+1.5);lg.connect(o.frequency);o.connect(f);o.start(a);o.stop(a+1.65);});
+ lfo.start(a);lfo.stop(a+1.65);noise(a,1.2,.12,'bandpass',3000);}
+function mcReset(){MC.state='off';MC.next=100;MEN.r.visible=CHR.r.visible=false;shock.visible=false;mBubble.hidden=cBubble.hidden=true;shakeAmt=0;}
+function mcFrame(t,b,dt){
+ while(!gameOver&&score>=MC.next){MC.next+=100;if(MC.state==='off'){MC.state='in';MC.t=t;MEN.r.position.copy(M_IN);CHR.r.position.copy(C_IN);MEN.r.visible=CHR.r.visible=true;
+   toast(score+' Punkte! Menei kommt mit seiner Christine!',true);}}
+ shakeAmt*=Math.exp(-dt*3);
+ if(MC.state==='off')return;
+ let mSay='',cSay='';
+ if(MC.state==='in'){const a=charTo(MEN,M_POS,dt,t),c=charTo(CHR,C_POS,dt,t);mSay='Servus! I bin da Menei – und des is mei Christine!';
+   if(a){MEN.r.lookAt(0,0,0);charPose(MEN,pose(0,b),dt);}if(c){CHR.r.lookAt(0,0,0);charPose(CHR,pose(0,b),dt);}
+   if(a&&c&&t-MC.t>2.2){MC.state='scream';MC.t=t;MC.killed=0;shock.visible=true;shock.position.x=C_POS.x;shock.position.z=C_POS.z;screamSound();}}
+ if(MC.state==='scream'){const u=(t-MC.t)/1.3,R=1+22*Math.min(1,u);cSay='AAAAAAHHHHH!!!';shakeAmt=Math.max(shakeAmt,.18*(1-Math.min(1,u)));
+   chrMouth.visible=true;const sp=pose(0,0);Object.assign(sp,{lSz:2.7,rSz:-2.7,lE:-.2,rE:-.2,hdx:-.45,sx:-.2,kL:.25,kR:.25,jump:.06*Math.abs(Math.sin(t*30))});charPose(CHR,sp,dt);
+   const cover=pose(0,0);Object.assign(cover,{lSz:.3,rSz:-.3,lSx:-2.3,rSx:-2.3,lE:-2.2,rE:-2.2,kL:.3,kR:.3,hdx:.2});charPose(MEN,cover,dt);
+   shock.scale.setScalar(R);shock.material.opacity=.9*(1-Math.min(1,u));
+   goblins.forEach(o=>{if(o.alive&&Math.hypot(o.g.position.x-C_POS.x,o.g.position.z-C_POS.z)<R){kill(o,false,0xd16cff);MC.killed++;}});
+   if(u>=1){MC.state='party';MC.t=t;shock.visible=false;chrMouth.visible=false;}}
+ if(MC.state==='party'){charPose(MEN,pose(1,b),dt);charPose(CHR,pose(0,b),dt);mSay=MC.killed?'Des woar mei Christine. '+MC.killed+' Goblins weg!':'Des woar mei Christine!';
+   if(t-MC.t>3.2)MC.state='out';}
+ if(MC.state==='out'){const a=charTo(MEN,M_IN,dt,t),c=charTo(CHR,C_IN,dt,t);if(a&&c)mcReset0();}
+ if(mSay&&MEN.r.visible)bubbleAt(mBubble,MEN,mSay,2.55);else mBubble.hidden=true;
+ if(cSay&&CHR.r.visible)bubbleAt(cBubble,CHR,cSay,2.3);else cBubble.hidden=true;}
+function mcReset0(){MC.state='off';MEN.r.visible=CHR.r.visible=false;mBubble.hidden=cBubble.hidden=true;}
+
 const kv=new THREE.Vector3();
 function endGame(msg){gameOver=true;document.getElementById('overMsg').textContent=msg;document.getElementById('overScore').textContent=score;overEl.hidden=false;banner.hidden=true;pushBtn.hidden=true;}
 
@@ -603,7 +715,7 @@ function frame(now){requestAnimationFrame(frame);
  if(m!==lastMove){lastMove=m;spinBase=Math.round(spin/TAU)*TAU;elName.textContent=MOVES[m][0];elText.textContent=MOVES[m][1];}
  const target=pose(m,b),a=1-Math.exp(-dt*14);for(const k in target)shown[k]+=(target[k]-shown[k])*a;
  const spinT=m===2?spinBase+2*TAU*sm(0,8,local):Math.round(spin/TAU)*TAU;spin+=(spinT-spin)*(1-Math.exp(-dt*10));
- apply(shown);root.rotation.y=spin;bobFrame(m,b,t,dt);fight(t,dt);kerstinFrame(t,b,dt);sammiFrame(t,dt);
+ apply(shown);root.rotation.y=spin;bobFrame(m,b,t,dt);fight(t,dt);kerstinFrame(t,b,dt);sammiFrame(t,dt);robiFrame(t,b,dt);mcFrame(t,b,dt);
  // world pulses on the beat
  ring.scale.setScalar(1+.06*dip);ring.material.opacity=.45+.5*dip;disc.material.opacity=.1+.14*dip;floorGlow.intensity=.6+1.4*dip;
  floorGlow.color.setHSL((b/16)%1,.8,.6);
@@ -615,6 +727,7 @@ function frame(now){requestAnimationFrame(frame);
  const ox=Math.sin(yaw)*r,oz=Math.cos(yaw)*r,e=reduced?1:sm(0,7,t);
  camera.position.set(ox*e,h*e+14*(1-e),oz*e+30*(1-e));
  look.set(0,1.25*e+11*(1-e),-62*(1-e));camera.lookAt(look);
+ if(shakeAmt>.002){camera.position.x+=(Math.random()-.5)*shakeAmt;camera.position.y+=(Math.random()-.5)*shakeAmt;}
  if(!introDone&&t>3.2){intro.style.opacity=0;introDone=true;}
  elBeat.textContent=Math.floor(b);elCombo.textContent='×'+(1+Math.floor(local))*(m===2?2:1);
  const say=m===4&&local>=3&&local<7.6;bubble.hidden=!say;

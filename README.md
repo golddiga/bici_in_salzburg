@@ -26,5 +26,10 @@ Moves: Hüftschwung, Klatschen, Pirouette, Disco-Finger, Salzburg-Hüpfer.
 Joker **Sammi**, ein schwarz-weißer Shih Tzu: Würde Bici Schaden nehmen, rennt er herbei und
 bellt laut. Mit 50 % Chance verbellt er den Goblin und der Schaden fällt weg, sonst passiert nichts.
 
+**Level-ups:** Alle 50 Punkte steigt das Level, die Goblins werden schneller, und **Robi aus Beham**
+kommt angerannt und erledigt einen der vorhandenen Goblins.
+Alle 100 Punkte kommt außerdem **Menei mit seiner Christine**: Christine schreit so laut, dass
+alle Goblins auf dem Platz sofort sterben.
+
 Bici hat fünf Leben; bei null ist Game Over. Ebenso, wenn die Bühnen-Leiste leer ist.
 Goblin = 1 Punkt, Kerstin vertrieben = 5 Punkte; sie kommt jedes Mal hartnäckiger zurück.
