@@ -67,6 +67,14 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 @keyframes pulse{to{transform:translateX(-50%) scale(1.04)}}
 button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
 @media (max-width:560px){.banner{top:auto;bottom:210px}}
+.bubble.joker{font-size:clamp(16px,2.6vw,22px);background:#fff;box-shadow:4px 4px 0 #2a2628}
+.bubble.joker::after{border-top-color:#fff}
+.stats b.joker{font-family:var(--body);font-weight:900;font-size:13px;color:var(--ink)}
+.toast{position:fixed;left:50%;top:calc(76px + env(safe-area-inset-top,0px));transform:translateX(-50%);max-width:min(440px,calc(100% - 32px));text-align:center;
+  font-weight:900;padding:10px 16px;border-radius:12px;pointer-events:none;color:var(--night)}
+.toast.good{background:var(--gold);box-shadow:0 3px 0 #2a2628}
+.toast.bad{background:#e9e4dc;box-shadow:0 3px 0 var(--rose)}
+@media (max-width:560px){.toast{top:auto;bottom:260px}}
 .hearts{color:var(--rose)!important;letter-spacing:.05em}
 .flash{position:fixed;inset:0;pointer-events:none;background:#ff2848;opacity:0}
 .over{position:fixed;inset:0;display:grid;place-items:center;padding-inline:16px;background:rgba(10,8,24,.55);z-index:5}
@@ -85,6 +93,8 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
 <div class="bubble" id="bubble" hidden>Salzburg!</div>
 <div class="flash" id="flash"></div>
 <div class="bubble rival" id="kbubble" hidden></div>
+<div class="bubble joker" id="sbubble" hidden>WAU! WAU! WAU!</div>
+<div class="toast" id="toast" hidden></div>
 <div class="banner" id="banner" hidden>Kerstin will die Tanzfläche! Tippe sie an oder drücke K, um sie zurückzudrängen.</div>
 <div class="over" id="over" hidden><div class="card"><div class="logo">GAME OVER</div><p><span id="overMsg">Die Goblins haben den Residenzplatz erobert.</span><br>Punkte: <b id="overScore">0</b></p><button id="againBtn" type="button">Nochmal</button></div></div>
 <div class="hud">
@@ -96,6 +106,7 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
     </div>
     <div class="stats" aria-live="off">
       <span>Punkte</span><b id="score">0</b>
+      <span>Joker</span><b class="joker">Sammi 50 %</b>
       <span>Bühne</span><b><i class="bar"><i id="stageBar"></i></i></b>
       <span>Leben</span><b id="hearts" class="hearts">♥♥♥♥♥</b>
       <span class="opt">Beat</span><b class="opt" id="beat">0</b>
@@ -451,7 +462,7 @@ function sfx(k){if(!soundOn)return;const t=ac.currentTime;
  if(k==='throw')noise(t,.16,.25,'bandpass',2600);
  if(k==='poof'){tone('square',880,t,.1,.07,3000);tone('square',1320,t+.06,.14,.06,3000);}
  if(k==='hit')tone('sawtooth',110,t,.35,.25,800);}
-function kill(o,byPlayer){if(!o.alive)return;o.alive=false;scene.remove(o.g);poof(o.g.position,byPlayer?0x9be35a:0xff4060);
+function kill(o,byPlayer,col){if(!o.alive)return;o.alive=false;scene.remove(o.g);poof(o.g.position,col||(byPlayer?0x9be35a:0xff4060));
  if(byPlayer){score++;elScore.textContent=score;sfx('poof');}}
 function bobRolle(){const t=(performance.now()-t0)/1000;if(t-rollT>1.1){rollT=t;if(soundOn){const a=ac.currentTime;tone('sawtooth',560,a,.08,.1,1400);}}}
 function nearest(){let best=null,bd=1e9;goblins.forEach(o=>{if(o.alive&&!o.targeted){const d=o.g.position.length();if(d<bd){bd=d;best=o;}}});return best;}
@@ -462,13 +473,12 @@ function clickAt(x,y){if(gameOver)return;ndc.set(x/innerWidth*2-1,-(y/innerHeigh
  if(K.state==='in'&&raycaster.intersectObject(kRoot,true).length){kPush();return;}
  const hit=raycaster.intersectObjects(goblins.filter(o=>o.alive&&!o.targeted).map(o=>o.g),true)[0];throwAt(hit?hit.object.userData.gob:nearest());}
 function restart(){goblins.forEach(o=>o.alive&&scene.remove(o.g));goblins.length=0;hearts=5;score=0;elScore.textContent=0;showHearts();
- gameOver=false;overEl.hidden=true;nextSpawn=(performance.now()-t0)/1000+3;resetKerstin((performance.now()-t0)/1000);}
+ gameOver=false;overEl.hidden=true;nextSpawn=(performance.now()-t0)/1000+3;resetKerstin((performance.now()-t0)/1000);sam.visible=false;SAM.until=-1;}
 function fight(t,dt){
  if(!gameOver&&t>nextSpawn){spawn();nextSpawn+=5;}
  const tmp=new THREE.Vector3();
  goblins.forEach(o=>{if(!o.alive)return;const p=o.g.position,d=Math.hypot(p.x,p.z);
-  if(d<1.3){kill(o,false);hearts--;showHearts();sfx('hit');flashEl.animate([{opacity:.45},{opacity:0}],{duration:450});
-    if(hearts<=0)endGame('Die Goblins haben den Residenzplatz erobert.');return;}
+  if(d<1.3){damage(o,t);return;}
   if(!gameOver){p.x-=p.x/d*o.speed*dt;p.z-=p.z/d*o.speed*dt;}
   p.y=.07*Math.abs(Math.sin(t*10+o.ph));o.g.lookAt(0,p.y,0);o.g.rotateZ(.12*Math.sin(t*10+o.ph));
   o.arm.rotation.x=d<3.5?-1.4+.9*Math.sin(t*9+o.ph):-.3+.3*Math.sin(t*10+o.ph);});
@@ -541,6 +551,47 @@ function kerstinFrame(t,b,dt){
  if(showK){kv.set(0,2.45,0).applyMatrix4(kRoot.matrixWorld).project(camera);kBubble.style.left=((kv.x+1)/2*innerWidth+18)+'px';kBubble.style.top=((1-kv.y)/2*innerHeight)+'px';}
  if(performance.now()<shoveUntil){const ang=Math.atan2(kRoot.position.x,kRoot.position.z);root.rotation.y=ang;
    arms[0].sh.rotation.set(-1.5,0,-.25);arms[1].sh.rotation.set(-1.5,0,.25);arms[0].el.rotation.x=arms[1].el.rotation.x=-.1;spine.rotation.x=.25;}}
+/* ---------- Joker Sammi: black-and-white Shih Tzu, 50 % damage block ---------- */
+const sWhite=M(0xf7f5f0,{map:furTex,roughness:1}),sWhiteD=M(0xf7f5f0,{map:furTex,roughness:1,side:THREE.DoubleSide}),sBlack=M(0x2a2628,{map:furTex,roughness:1}),sBow=M(0xe0303a,{roughness:.5});
+const sam=new THREE.Group();sam.visible=false;scene.add(sam);
+const samBody=new THREE.Group();sam.add(samBody);
+{const sk=new THREE.CylinderGeometry(.13,.21,.21,22,1,true);sk.translate(0,-.105,0);const m=new THREE.Mesh(sk,sWhiteD);m.position.y=.23;m.castShadow=true;samBody.add(m);}
+dball(.15,sWhite,1,.85,1.4,0,.25,0,samBody);dball(.12,sBlack,1.05,.5,1.15,0,.32,-.05,samBody);
+[[.07,.1],[-.07,.1],[.07,-.1],[-.07,-.1]].forEach(([x,z])=>dball(.035,sWhite,1,.6,1.3,x,.02,z,samBody));
+const samHead=new THREE.Group();samHead.position.set(0,.37,.17);samBody.add(samHead);
+dball(.11,sWhite,1.1,1,1,0,0,0,samHead);
+[1,-1].forEach(s=>{dball(.045,sBlack,1,1,.5,.045*s,.02,.085,samHead);dball(.018,blk,1,1,1,.045*s,.02,.1,samHead);
+  dball(.005,M(0xffffff,{emissive:0xffffff}),1,1,1,.045*s+.006,.027,.117,samHead);
+  dball(.05,sBlack,.55,1.6,.8,.11*s,-.04,-.01,samHead);dball(.022,sBow,1.4,.8,.7,.03*s,.135,0,samHead);});
+dball(.05,sWhite,1.1,.8,.8,0,-.04,.1,samHead);dball(.02,blk,1.2,.9,1,0,-.02,.148,samHead);dball(.06,sWhite,1.2,.7,.8,0,-.085,.08,samHead);
+dball(.04,sWhite,1,1,1,0,.11,0,samHead);
+dball(.075,sWhite,1,1.3,.8,0,.4,-.18,samBody);dball(.04,sBlack,1,1,1,0,.47,-.2,samBody);
+const SAM={home:new THREE.Vector3(-1.25,0,.85),exit:new THREE.Vector3(-8,0,5),until:-1,barks:[]};
+const sBubble=document.getElementById('sbubble'),toastEl=document.getElementById('toast');let toastAnim=null;
+function toast(msg,good){toastEl.textContent=msg;toastEl.className='toast '+(good?'good':'bad');toastEl.hidden=false;
+ if(toastAnim)toastAnim.cancel();toastAnim=toastEl.animate([{opacity:0,transform:'translate(-50%,-8px)'},{opacity:1,transform:'translate(-50%,0)',offset:.1},{opacity:1,offset:.8},{opacity:0}],{duration:2600});
+ toastAnim.onfinish=()=>toastEl.hidden=true;}
+function barkSound(when){const t=ac.currentTime+when,o=ac.createOscillator(),f=ac.createBiquadFilter(),g=ac.createGain();o.type='sawtooth';
+ o.frequency.setValueAtTime(760,t);o.frequency.exponentialRampToValueAtTime(380,t+.13);f.type='bandpass';f.frequency.value=1100;f.Q.value=1.2;
+ g.gain.setValueAtTime(.7,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);o.connect(f);f.connect(g);g.connect(master);o.start(t);o.stop(t+.18);noise(t,.09,.35,'bandpass',1600);}
+function sammiCall(t){if(!sam.visible){sam.visible=true;sam.position.copy(SAM.exit);}
+ SAM.until=t+4;SAM.barks=[t+.45,t+.75,t+1.05];if(soundOn)[.45,.75,1.05].forEach(barkSound);}
+function damage(o,t){const blocked=Math.random()<.5;sammiCall(t);
+ kill(o,false,blocked?0xffd23a:0xff4060);
+ if(blocked){toast('Joker Sammi bellt den Goblin weg – kein Schaden!',true);return;}
+ hearts--;showHearts();sfx('hit');flashEl.animate([{opacity:.45},{opacity:0}],{duration:450});toast('Sammi bellt … bringt nix. −1 Leben',false);
+ if(hearts<=0)endGame('Die Goblins haben den Residenzplatz erobert.');}
+const sv=new THREE.Vector3();
+function sammiFrame(t,dt){if(!sam.visible){sBubble.hidden=true;return;}
+ const target=t<SAM.until?SAM.home:SAM.exit;sv.subVectors(target,sam.position);sv.y=0;const d=sv.length(),moving=d>.05;
+ if(moving){sam.position.addScaledVector(sv,Math.min(1,7*dt/d));sam.lookAt(target.x,0,target.z);}
+ else if(t<SAM.until){const g=goblins.find(o=>o.alive);sam.lookAt(g?g.g.position.x:sam.position.x,0,g?g.g.position.z:sam.position.z+1);}
+ if(!moving&&t>=SAM.until){sam.visible=false;return;}
+ let pulse=0;SAM.barks.forEach(bt=>{const u=t-bt;if(u>=0&&u<.22)pulse=Math.max(pulse,Math.sin(Math.PI*u/.22));});
+ samBody.position.y=moving?.05*Math.abs(Math.sin(t*22)):.06*pulse;samHead.rotation.x=-.5*pulse;samBody.scale.set(1+.06*pulse,1-.08*pulse,1);
+ const say=SAM.barks.length&&t>SAM.barks[0]&&t<SAM.barks[2]+.7;sBubble.hidden=!say;
+ if(say){sv.set(0,.85,0).applyMatrix4(sam.matrixWorld).project(camera);sBubble.style.left=((sv.x+1)/2*innerWidth+14)+'px';sBubble.style.top=((1-sv.y)/2*innerHeight)+'px';}}
+
 const kv=new THREE.Vector3();
 function endGame(msg){gameOver=true;document.getElementById('overMsg').textContent=msg;document.getElementById('overScore').textContent=score;overEl.hidden=false;banner.hidden=true;pushBtn.hidden=true;}
 
@@ -552,7 +603,7 @@ function frame(now){requestAnimationFrame(frame);
  if(m!==lastMove){lastMove=m;spinBase=Math.round(spin/TAU)*TAU;elName.textContent=MOVES[m][0];elText.textContent=MOVES[m][1];}
  const target=pose(m,b),a=1-Math.exp(-dt*14);for(const k in target)shown[k]+=(target[k]-shown[k])*a;
  const spinT=m===2?spinBase+2*TAU*sm(0,8,local):Math.round(spin/TAU)*TAU;spin+=(spinT-spin)*(1-Math.exp(-dt*10));
- apply(shown);root.rotation.y=spin;bobFrame(m,b,t,dt);fight(t,dt);kerstinFrame(t,b,dt);
+ apply(shown);root.rotation.y=spin;bobFrame(m,b,t,dt);fight(t,dt);kerstinFrame(t,b,dt);sammiFrame(t,dt);
  // world pulses on the beat
  ring.scale.setScalar(1+.06*dip);ring.material.opacity=.45+.5*dip;disc.material.opacity=.1+.14*dip;floorGlow.intensity=.6+1.4*dip;
  floorGlow.color.setHSL((b/16)%1,.8,.6);

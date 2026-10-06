@@ -23,5 +23,8 @@ three.js (r128) kommt vom CDN.
 | M | Sound an/aus |
 
 Moves: Hüftschwung, Klatschen, Pirouette, Disco-Finger, Salzburg-Hüpfer.
+Joker **Sammi**, ein schwarz-weißer Shih Tzu: Würde Bici Schaden nehmen, rennt er herbei und
+bellt laut. Mit 50 % Chance verbellt er den Goblin und der Schaden fällt weg, sonst passiert nichts.
+
 Bici hat fünf Leben; bei null ist Game Over. Ebenso, wenn die Bühnen-Leiste leer ist.
 Goblin = 1 Punkt, Kerstin vertrieben = 5 Punkte; sie kommt jedes Mal hartnäckiger zurück.
