@@ -16,6 +16,7 @@ three.js (r128) kommt vom CDN.
 | Goblin antippen / F | Mozartkugel werfen |
 | Ziehen / Mausrad | Kamera drehen / zoomen |
 | Leertaste | nächster Tanz-Move |
+| R | Bob macht eine Rolle |
 | M | Sound an/aus |
 
 Moves: Hüftschwung, Klatschen, Pirouette, Disco-Finger, Salzburg-Hüpfer.

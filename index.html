@@ -91,15 +91,16 @@ button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
   <div class="row bottom">
     <div class="caption">
       <div class="move" id="moveName">Hüftschwung</div>
-      <p id="moveText">Bici wärmt sich vor dem Dom auf, Bob wedelt den Takt.</p>
+      <p id="moveText">Bici wärmt sich vor dem Dom auf, Bob wedelt und macht eine Rolle.</p>
     </div>
     <div>
       <div class="controls">
         <button class="ghost" id="soundBtn" type="button">Sound an</button>
         <button class="ghost" id="nextBtn" type="button">Nächster Move</button>
+        <button class="ghost" id="rollBtn" type="button">Bob: Rolle!</button>
         <button id="throwBtn" type="button">Mozartkugel werfen</button>
       </div>
-      <div class="hint">Goblins antippen oder F · Ziehen dreht die Kamera · Leertaste = Move · M = Sound</div>
+      <div class="hint">Goblins antippen oder F · R = Bob rollt · Leertaste = Move · M = Sound</div>
     </div>
   </div>
 </div>
@@ -294,7 +295,9 @@ const furTex=noiseTex(128,(x,s)=>{x.fillStyle='#f3f0e9';x.fillRect(0,0,s,s);for(
   x.strokeStyle=`hsl(38,14%,${l}%)`;x.beginPath();x.moveTo(a,b);x.lineTo(a+Math.cos(an)*5,b+Math.sin(an)*5);x.stroke();}},3);
 const fur=M(0xffffff,{map:furTex,bumpMap:furTex,bumpScale:.025,roughness:1}),tanM=M(0xc98a4b,{map:furTex,roughness:1}),blk=M(0x1b1412,{roughness:.3});
 const bob=new THREE.Group();bob.position.set(1.4,0,.6);scene.add(bob);
-const bobP=new THREE.Group();bobP.position.z=-.18;bob.add(bobP);
+const rollG=new THREE.Group();rollG.position.y=.22;bob.add(rollG);
+const bobP=new THREE.Group();bobP.position.set(0,-.22,-.18);rollG.add(bobP);
+let rollT=-9,autoRoll=-1;
 const dball=(r,mat,sx=1,sy=1,sz=1,x=0,y=0,z=0,par=bobP)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(r,24,16),mat);m.scale.set(sx,sy,sz);m.position.set(x,y,z);m.castShadow=true;par.add(m);return m;};
 dball(.15,fur,1,.95,1.7,0,.4,.18);dball(.12,fur,1,1.1,1,0,.42,.34);
 const neckB=dball(.075,fur,1,1.5,1,0,.52,.4);neckB.rotation.x=.5;
@@ -315,19 +318,23 @@ function bobFrame(m,b,t,dt){const ph=b*TAU,dip=(1+Math.cos(ph))/2,up=Math.max(0,
  if(m===3)Object.assign(T,{hop:.28*up,leg:-.5*up,rear:-.25*up});
  if(m===4&&b%8<3){const air=Math.sin(Math.PI*(b%1));Object.assign(T,{hop:.3*air,leg:-.5*air,rear:-.2*air});}
  if(m===4&&b%8>=3)Object.assign(T,{rear:-1.05,leg:-.8,tilt:.25});
+ if(m===0&&b%8>=4&&autoRoll!==Math.floor(b/8)){autoRoll=Math.floor(b/8);rollT=t;}
+ const ru=(t-rollT)/1.1,rolling=ru>=0&&ru<1;if(rolling)Object.assign(T,{rear:0,hop:0,leg:0});
  const a=1-Math.exp(-dt*14);for(const k in T)bobS[k]+=(T[k]-bobS[k])*a;
  bob.position.y=bobS.hop;bobP.rotation.x=bobS.rear;hind.forEach(l=>l.rotation.x=-bobS.rear);
  front.forEach((l,i)=>l.rotation.x=bobS.leg*(m===1?(i?1:.7):1)-(m===0&&i?bobS.leg*2:0));
  headB.rotation.set(-bobS.rear*.6,0,bobS.tilt);
  ears.forEach(e=>e.g.rotation.z=e.s*(.15*Math.sin(ph)+.25*bobS.hop/.28));
  tailG.rotation.set(Math.PI-.35,0,.6*Math.sin(t*19));
+ if(rolling){const tuck=Math.sin(Math.PI*ru);rollG.rotation.z=TAU*sm(0,1,ru);rollG.position.y=.22+.13*tuck;
+   hind.forEach(l=>l.rotation.x=1.1*tuck);front.forEach(l=>l.rotation.x=-1.1*tuck);}else{rollG.rotation.z=0;rollG.position.y=.22;}
  bob.rotation.y=-.55-spin;
  const wpA=wg.attributes.position.array;wd.forEach((d,i)=>{const f=(t*1.4+d[5])%1,r=d[0]+(d[1]-d[0])*f;wpA[i*3]=Math.cos(d[4])*r;wpA[i*3+1]=d[2]-(d[2]-d[3])*f*f;wpA[i*3+2]=Math.sin(d[4])*r;});
  wg.attributes.position.needsUpdate=true;}
 
 /* ---------- choreography ---------- */
 const MOVES=[
- ['Hüftschwung','Bici wärmt sich vor dem Dom auf, Bob wedelt den Takt.'],
+ ['Hüftschwung','Bici wärmt sich vor dem Dom auf, Bob wedelt und macht eine Rolle.'],
  ['Klatschen','Bici klatscht auf jeden Beat, Bob macht Männchen und rudert mit.'],
  ['Pirouette','Zwei Drehungen, der Rock fliegt. Bob dreht sich andersrum. Combo ×2.'],
  ['Disco-Finger','Bici zeigt zum Mond, Bob springt auf jeden Beat.'],
@@ -387,7 +394,8 @@ function toggleSound(){
 const soundBtn=document.getElementById('soundBtn');soundBtn.addEventListener('click',toggleSound);
 function nextMove(){offset++;}
 document.getElementById('nextBtn').addEventListener('click',nextMove);
-addEventListener('keydown',e=>{if(e.code==='Space'&&e.target.tagName!=='BUTTON'){e.preventDefault();nextMove();}if(e.key==='m'||e.key==='M')toggleSound();if(e.key==='f'||e.key==='F')throwAt(nearest());});
+addEventListener('keydown',e=>{if(e.code==='Space'&&e.target.tagName!=='BUTTON'){e.preventDefault();nextMove();}if(e.key==='m'||e.key==='M')toggleSound();if(e.key==='f'||e.key==='F')throwAt(nearest());if(e.key==='r'||e.key==='R')bobRolle();});
+document.getElementById('rollBtn').addEventListener('click',bobRolle);
 document.getElementById('throwBtn').addEventListener('click',()=>throwAt(nearest()));
 document.getElementById('againBtn').addEventListener('click',()=>restart());
 
@@ -422,6 +430,7 @@ function sfx(k){if(!soundOn)return;const t=ac.currentTime;
  if(k==='hit')tone('sawtooth',110,t,.35,.25,800);}
 function kill(o,byPlayer){if(!o.alive)return;o.alive=false;scene.remove(o.g);poof(o.g.position,byPlayer?0x9be35a:0xff4060);
  if(byPlayer){score++;elScore.textContent=score;sfx('poof');}}
+function bobRolle(){const t=(performance.now()-t0)/1000;if(t-rollT>1.1){rollT=t;if(soundOn){const a=ac.currentTime;tone('sawtooth',560,a,.08,.1,1400);}}}
 function nearest(){let best=null,bd=1e9;goblins.forEach(o=>{if(o.alive&&!o.targeted){const d=o.g.position.length();if(d<bd){bd=d;best=o;}}});return best;}
 function throwAt(o){if(gameOver||!o||!o.alive||o.targeted)return;o.targeted=true;throwUntil=performance.now()+320;
  const m=new THREE.Mesh(new THREE.SphereGeometry(.11,16,12),kugelM);m.castShadow=true;scene.add(m);
