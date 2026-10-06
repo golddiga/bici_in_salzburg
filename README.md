@@ -3,7 +3,7 @@
 3D-Gameplay-Preview im Browser: Bici und ihr Terrier Bob tanzen nachts auf dem
 Salzburger Residenzplatz, vor Dom, Residenzbrunnen und Festung Hohensalzburg.
 Alle fünf Sekunden kommen drei Goblins, die Bici mit Mozartkugeln abwehrt.
-Und immer wieder taucht Bicis Schwester Kerstin auf und will die Tanzfläche übernehmen:
+Und immer wieder taucht Bicis rothaarige Schwester Kerstin mit ihrem Dackel auf und will die Tanzfläche übernehmen:
 steht sie im Kreis, leert sich die Bühnen-Leiste. Bici muss sie zurückdrängen.
 
 ## Starten
