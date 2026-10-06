@@ -107,6 +107,7 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
 <div class="bubble scream" id="cbubble" hidden></div>
 <div class="banner" id="banner" hidden>Kerstin will die Tanzfläche! Tippe sie an oder drücke K, um sie zurückzudrängen.</div>
 <div class="over" id="over" hidden><div class="card"><div class="logo">GAME OVER</div><p><span id="overMsg">Die Goblins haben den Residenzplatz erobert.</span><br>Punkte: <b id="overScore">0</b></p><button id="againBtn" type="button">Nochmal</button></div></div>
+<div class="over" id="pauseEl" hidden><div class="card"><div class="logo">PAUSE</div><p>Bici verschnauft kurz. Die Goblins warten.</p><button id="resumeBtn" type="button">Weiter</button></div></div>
 <div class="hud">
   <div class="row">
     <div>
@@ -132,13 +133,14 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
     </div>
     <div>
       <div class="controls">
+        <button class="ghost" id="pauseBtn" type="button">Pause</button>
         <button class="ghost" id="soundBtn" type="button">Sound an</button>
         <button class="ghost" id="nextBtn" type="button">Nächster Move</button>
         <button class="ghost" id="rollBtn" type="button">Bob: Rolle!</button>
         <button id="throwBtn" type="button">Mozartkugel werfen</button>
         <button class="push" id="pushBtn" type="button" hidden>Zurückdrängen</button>
       </div>
-      <div class="hint">Goblins antippen oder F · Kerstin antippen oder K · R = Bob rollt · Leertaste = Move · M = Sound</div>
+      <div class="hint">Goblins antippen oder F · Kerstin antippen oder K · R = Bob rollt · Leertaste = Move · M = Sound · P = Pause</div>
     </div>
   </div>
 </div>
@@ -432,20 +434,25 @@ function toggleSound(){
  if(!ac){ac=new (window.AudioContext||window.webkitAudioContext)();const comp=ac.createDynamicsCompressor();master=ac.createGain();master.gain.value=.55;master.connect(comp);comp.connect(ac.destination);
   noiseBuf=ac.createBuffer(1,ac.sampleRate*.3,ac.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}
  soundOn=!soundOn;
- if(soundOn){ac.resume();const b=beatNow(),n=Math.ceil(b);nextStep=n*4;stepTime=ac.currentTime+(n-b)*60/BPM;timer=setInterval(schedule,25);}
+ if(soundOn){if(!paused)ac.resume();const b=beatNow(),n=Math.ceil(b);nextStep=n*4;stepTime=ac.currentTime+(n-b)*60/BPM;timer=setInterval(schedule,25);}
  else{clearInterval(timer);}
  soundBtn.textContent=soundOn?'Sound aus':'Sound an';}
 const soundBtn=document.getElementById('soundBtn');soundBtn.addEventListener('click',toggleSound);
-function nextMove(){offset++;}
+function nextMove(){if(!paused)offset++;}
 document.getElementById('nextBtn').addEventListener('click',nextMove);
-addEventListener('keydown',e=>{if(e.code==='Space'&&e.target.tagName!=='BUTTON'){e.preventDefault();nextMove();}if(e.key==='m'||e.key==='M')toggleSound();if(e.key==='f'||e.key==='F')throwAt(nearest());if(e.key==='r'||e.key==='R')bobRolle();if(e.key==='k'||e.key==='K')kPush();});
+addEventListener('keydown',e=>{if(e.key==='p'||e.key==='P'||e.key==='Escape'){togglePause();return;}if(e.key==='m'||e.key==='M')toggleSound();if(paused)return;if(e.code==='Space'&&e.target.tagName!=='BUTTON'){e.preventDefault();nextMove();}if(e.key==='f'||e.key==='F')throwAt(nearest());if(e.key==='r'||e.key==='R')bobRolle();if(e.key==='k'||e.key==='K')kPush();});
 document.getElementById('pushBtn').addEventListener('click',()=>kPush());
 document.getElementById('rollBtn').addEventListener('click',bobRolle);
 document.getElementById('throwBtn').addEventListener('click',()=>throwAt(nearest()));
+document.getElementById('pauseBtn').addEventListener('click',()=>togglePause());
+document.getElementById('resumeBtn').addEventListener('click',()=>togglePause(false));
+document.addEventListener('visibilitychange',()=>{if(document.hidden)togglePause(true);});
 document.getElementById('againBtn').addEventListener('click',()=>restart());
 
 /* ---------- loop ---------- */
-const t0=performance.now();const beatNow=()=>(performance.now()-t0)/1000*BPM/60;
+/* game clock: stands still while paused */
+let paused=false,pauseAt=0,pausedMs=0;const gnow=()=>(paused?pauseAt:performance.now())-pausedMs;
+const t0=gnow();const beatNow=()=>(gnow()-t0)/1000*BPM/60;
 /* ---------- goblins: three every five seconds ---------- */
 const gobSkin=M(0x6f9a3a,{roughness:.7,emissive:0x1b2a0a,emissiveIntensity:.6}),gobTunic=M(0x5a3d26,{roughness:.9}),gobEye=B(0xffd23a),clubM=M(0x4a3020,{roughness:.9});
 const kugelM=M(0x9fb6d6,{metalness:.85,roughness:.25,emissive:0x2a3a60,emissiveIntensity:.5});
@@ -475,16 +482,16 @@ function sfx(k){if(!soundOn)return;const t=ac.currentTime;
  if(k==='hit')tone('sawtooth',110,t,.35,.25,800);}
 function kill(o,byPlayer,col){if(!o.alive)return;o.alive=false;scene.remove(o.g);poof(o.g.position,col||(byPlayer?0x9be35a:0xff4060));
  if(byPlayer){score++;elScore.textContent=score;sfx('poof');}}
-function bobRolle(){const t=(performance.now()-t0)/1000;if(t-rollT>1.1){rollT=t;if(soundOn){const a=ac.currentTime;tone('sawtooth',560,a,.08,.1,1400);}}}
+function bobRolle(){if(paused)return;const t=(gnow()-t0)/1000;if(t-rollT>1.1){rollT=t;if(soundOn){const a=ac.currentTime;tone('sawtooth',560,a,.08,.1,1400);}}}
 function nearest(){let best=null,bd=1e9;goblins.forEach(o=>{if(o.alive&&!o.targeted){const d=o.g.position.length();if(d<bd){bd=d;best=o;}}});return best;}
-function throwAt(o){if(gameOver||!o||!o.alive||o.targeted)return;o.targeted=true;throwUntil=performance.now()+320;
+function throwAt(o){if(gameOver||paused||!o||!o.alive||o.targeted)return;o.targeted=true;throwUntil=gnow()+320;
  const m=new THREE.Mesh(new THREE.SphereGeometry(.11,16,12),kugelM);m.castShadow=true;scene.add(m);
  shots.push({m,o,t:0,from:new THREE.Vector3(-.4,1.6,.2).applyAxisAngle(UP,root.rotation.y)});sfx('throw');}
-function clickAt(x,y){if(gameOver)return;ndc.set(x/innerWidth*2-1,-(y/innerHeight)*2+1);raycaster.setFromCamera(ndc,camera);
+function clickAt(x,y){if(gameOver||paused)return;ndc.set(x/innerWidth*2-1,-(y/innerHeight)*2+1);raycaster.setFromCamera(ndc,camera);
  if(K.state==='in'&&raycaster.intersectObject(kRoot,true).length){kPush();return;}
  const hit=raycaster.intersectObjects(goblins.filter(o=>o.alive&&!o.targeted).map(o=>o.g),true)[0];throwAt(hit?hit.object.userData.gob:nearest());}
 function restart(){goblins.forEach(o=>o.alive&&scene.remove(o.g));goblins.length=0;hearts=5;score=0;elScore.textContent=0;showHearts();
- gameOver=false;overEl.hidden=true;nextSpawn=(performance.now()-t0)/1000+3;resetKerstin((performance.now()-t0)/1000);sam.visible=false;SAM.until=-1;robiReset();mcReset();}
+ gameOver=false;overEl.hidden=true;nextSpawn=(gnow()-t0)/1000+3;resetKerstin((gnow()-t0)/1000);sam.visible=false;SAM.until=-1;robiReset();mcReset();}
 function fight(t,dt){
  if(!gameOver&&t>nextSpawn){spawn();nextSpawn+=5;}
  const tmp=new THREE.Vector3();
@@ -499,7 +506,7 @@ function fight(t,dt){
   if(s.t>=1){scene.remove(s.m);shots.splice(i,1);kill(s.o,true);}}
  for(let i=bursts.length-1;i>=0;i--){const b=bursts[i];b.t+=dt;b.parts.forEach(([m,v])=>{m.position.addScaledVector(v,dt);v.y-=9*dt;m.material.opacity=Math.max(0,1-b.t/.7);});
   if(b.t>.7){b.parts.forEach(([m])=>{scene.remove(m);m.geometry.dispose();m.material.dispose();});bursts.splice(i,1);}}
- if(performance.now()<throwUntil){arms[1].sh.rotation.set(-2.3,0,-.25);arms[1].el.rotation.x=-.15;}}
+ if(gnow()<throwUntil){arms[1].sh.rotation.set(-2.3,0,-.25);arms[1].el.rotation.x=-.15;}}
 
 
 const elBeat=document.getElementById('beat'),elCombo=document.getElementById('combo'),elName=document.getElementById('moveName'),elText=document.getElementById('moveText'),intro=document.getElementById('intro');
@@ -534,7 +541,7 @@ function kSay(txt,t,d){K.say=txt;K.sayUntil=t+d;kBubble.textContent=txt;}
 function kArrive(t){Object.assign(K,{state:'in',r:10.5,a:(rnd()-.5)*2.2,vel:0});kRoot.visible=true;banner.hidden=false;pushBtn.hidden=false;
  kSay(['Jetzt tanz ICH!','Platz da, Schwesterherz!','Die Bühne gehört mir!'][K.level%3],t,2.6);
  if(soundOn){const a=ac.currentTime;tone('sawtooth',720,a+.45,.07,.09,1800);tone('sawtooth',650,a+.58,.08,.09,1800);tone('square',523,a,.12,.07,3000);tone('square',659,a+.12,.12,.07,3000);tone('square',784,a+.24,.25,.07,3000);}}
-function kPush(){if(gameOver||K.state!=='in')return;const t=(performance.now()-t0)/1000;K.vel+=5.5;K.staggerUntil=t+.45;shoveUntil=performance.now()+280;
+function kPush(){if(gameOver||paused||K.state!=='in')return;const t=(gnow()-t0)/1000;K.vel+=5.5;K.staggerUntil=t+.45;shoveUntil=gnow()+280;
  if(rnd()<.35)kSay(['Hey!','Uff!','Lass das!','Mama!!'][Math.floor(rnd()*4)],t,1);
  if(soundOn){const a=ac.currentTime;tone('sine',95,a,.22,.55);noise(a,.08,.2,'lowpass',900);}}
 function resetKerstin(t){Object.assign(K,{state:'off',next:t+15,level:0,sayUntil:0});kRoot.visible=false;banner.hidden=true;pushBtn.hidden=true;stageMeter=1;}
@@ -560,7 +567,7 @@ function kerstinFrame(t,b,dt){
  elStage.style.width=(stageMeter*100).toFixed(1)+'%';elStage.classList.toggle('low',stageMeter<.35);
  const showK=kRoot.visible&&t<K.sayUntil;kBubble.hidden=!showK;
  if(showK){kv.set(0,2.45,0).applyMatrix4(kRoot.matrixWorld).project(camera);kBubble.style.left=((kv.x+1)/2*innerWidth+18)+'px';kBubble.style.top=((1-kv.y)/2*innerHeight)+'px';}
- if(performance.now()<shoveUntil){const ang=Math.atan2(kRoot.position.x,kRoot.position.z);root.rotation.y=ang;
+ if(gnow()<shoveUntil){const ang=Math.atan2(kRoot.position.x,kRoot.position.z);root.rotation.y=ang;
    arms[0].sh.rotation.set(-1.5,0,-.25);arms[1].sh.rotation.set(-1.5,0,.25);arms[0].el.rotation.x=arms[1].el.rotation.x=-.1;spine.rotation.x=.25;}}
 /* ---------- Joker Sammi: black-and-white Shih Tzu, 50 % damage block ---------- */
 const sWhite=M(0xf7f5f0,{map:furTex,roughness:1}),sWhiteD=M(0xf7f5f0,{map:furTex,roughness:1,side:THREE.DoubleSide}),sBlack=M(0x2a2628,{map:furTex,roughness:1}),sBow=M(0xe0303a,{roughness:.5});
@@ -706,11 +713,18 @@ function mcReset0(){MC.state='off';MEN.r.visible=CHR.r.visible=false;mBubble.hid
 
 const kv=new THREE.Vector3();
 function endGame(msg){gameOver=true;document.getElementById('overMsg').textContent=msg;document.getElementById('overScore').textContent=score;overEl.hidden=false;banner.hidden=true;pushBtn.hidden=true;}
+const pauseEl=document.getElementById('pauseEl'),pauseBtn=document.getElementById('pauseBtn');
+function togglePause(want=!paused){if(want===paused||(want&&gameOver))return;paused=want;
+ if(paused){pauseAt=performance.now();if(ac&&soundOn)ac.suspend();if(window.speechSynthesis)speechSynthesis.cancel();}
+ else{pausedMs+=performance.now()-pauseAt;if(ac&&soundOn)ac.resume();}
+ document.getAnimations().forEach(a=>paused?a.pause():a.play());
+ pauseEl.hidden=!paused;pauseBtn.textContent=paused?'Weiter':'Pause';if(paused)document.getElementById('resumeBtn').focus();}
 
-let last=performance.now(),introDone=false,saidCycle=-1;const head3=new THREE.Vector3(),bubble=document.getElementById('bubble');
+let last=gnow(),introDone=false,saidCycle=-1;const head3=new THREE.Vector3(),bubble=document.getElementById('bubble');
 function speak(){if(!soundOn||!window.speechSynthesis)return;try{const u=new SpeechSynthesisUtterance('Salzburg!');u.lang='de-AT';u.pitch=1.5;u.rate=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}const look=new THREE.Vector3();
-function frame(now){requestAnimationFrame(frame);
- const dt=Math.min(.05,(now-last)/1000);last=now;const t=(now-t0)/1000,b=t*BPM/60,ph=b*TAU,dip=(1+Math.cos(ph))/2;
+function frame(){requestAnimationFrame(frame);
+ if(paused){renderer.render(scene,camera);return;}
+ const now=gnow(),dt=Math.min(.05,(now-last)/1000);last=now;const t=(now-t0)/1000,b=t*BPM/60,ph=b*TAU,dip=(1+Math.cos(ph))/2;
  const m=(Math.floor(b/8)+offset)%MOVES.length,local=b%8;
  if(m!==lastMove){lastMove=m;spinBase=Math.round(spin/TAU)*TAU;elName.textContent=MOVES[m][0];elText.textContent=MOVES[m][1];}
  const target=pose(m,b),a=1-Math.exp(-dt*14);for(const k in target)shown[k]+=(target[k]-shown[k])*a;

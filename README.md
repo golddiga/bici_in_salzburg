@@ -21,6 +21,7 @@ three.js (r128) kommt vom CDN.
 | Kerstin antippen / K | Kerstin zurückdrängen |
 | R | Bob macht eine Rolle |
 | M | Sound an/aus |
+| P / Esc / Pause-Button | Pause an/aus (auch automatisch beim Tab-Wechsel) |
 
 Moves: Hüftschwung, Klatschen, Pirouette, Disco-Finger, Salzburg-Hüpfer.
 Joker **Sammi**, ein schwarz-weißer Shih Tzu: Würde Bici Schaden nehmen, rennt er herbei und
