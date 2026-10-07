@@ -61,5 +61,9 @@ Alle 150 Punkte geht es automatisch in ein neues Level, und jedes Level macht di
 - **Baileys** (R): rollt; manchmal rollt er in Richtung der Goblins, walzt alle auf seiner Bahn platt,
   rollt hinaus und kommt zurück.
 
+**Mama** kommt einmal pro Level auf ihrem E-Scooter (schlank, blond, Pferdeschwanz), sobald Kerstin die
+Tanzfläche betritt: Kerstin bleibt stehen, die Bühne leert sich nicht weiter, Mama schimpft und schickt
+Kerstin heim. Punkte gibt es dafür keine, die bringt nur selbst Zurückdrängen.
+
 Bici hat fünf Leben; bei null ist Game Over. Ebenso, wenn die Bühnen-Leiste leer ist.
 Goblin = 1 Punkt, Kerstin vertrieben = 5 Punkte; sie kommt jedes Mal hartnäckiger zurück.

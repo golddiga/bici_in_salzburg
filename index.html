@@ -84,6 +84,8 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
 .bubble.menei::after{border-top-color:#e4f0e6}
 .bubble.scream{background:#ff7ad9;color:#fff;font-size:clamp(26px,5vw,44px);box-shadow:5px 5px 0 #8e1f3f;animation:shake .08s linear infinite alternate}
 .bubble.scream::after{border-top-color:#ff7ad9}
+.bubble.mama{background:#fff3c4;box-shadow:4px 4px 0 #c9a227;font-size:clamp(15px,2.4vw,20px);max-width:260px}
+.bubble.mama::after{border-top-color:#fff3c4}
 @keyframes shake{to{margin-left:4px;margin-top:-3px}}
 .hearts{color:var(--rose)!important;letter-spacing:.05em}
 .flash{position:fixed;inset:0;pointer-events:none;background:#ff2848;opacity:0}
@@ -215,6 +217,7 @@ body.gb #fmtBtn{position:fixed;z-index:6;top:calc(18px + env(safe-area-inset-top
 <div class="bubble robi" id="rbubble" hidden></div>
 <div class="bubble menei" id="mbubble" hidden></div>
 <div class="bubble scream" id="cbubble" hidden></div>
+<div class="bubble mama" id="mabubble" hidden></div>
 <div class="banner" id="banner" hidden>Kerstin will die Tanzfläche! <span class="kb">Tippe sie an oder drücke K</span><span class="tb">Drücke B oder tippe sie an</span>, um sie zurückzudrängen.</div>
 <div class="over" id="over" hidden><div class="card"><div class="logo" id="overTitle">GAME OVER</div><p><span id="overMsg">Die Goblins haben den Residenzplatz erobert.</span><br>Punkte: <b id="overScore">0</b></p><button id="againBtn" type="button">Nochmal</button></div></div>
 <div class="over" id="pauseEl" hidden><div class="card"><div class="logo">PAUSE</div><p>Bici verschnauft kurz. Die Goblins warten.<br><small>Tippen zum Weiterspielen</small></p><button id="resumeBtn" type="button">Weiter</button></div></div>
@@ -857,7 +860,7 @@ function clickAt(x,y){if(gameOver||paused)return;ndc.set((x-SR.left)/SR.width*2-
  const hit=raycaster.intersectObjects(goblins.filter(o=>o.alive&&!o.targeted).map(o=>o.g),true)[0];throwAt(hit?hit.object.userData.gob:nearest());}
 function restart(){goblins.forEach(o=>o.alive&&scene.remove(o.g));goblins.length=0;hearts=5;score=0;elScore.textContent=0;showHearts();
  gameOver=false;overEl.hidden=true;nextSpawn=(gnow()-t0)/1000+3;resetKerstin((gnow()-t0)/1000);sam.visible=false;SAM.until=-1;SAM.target=null;SAM.nextRandom=(gnow()-t0)/1000+35;robiReset();mcReset();
- BAI.state='home';bob.position.copy(BAI_HOME);setWorld(0);
+ BAI.state='home';bob.position.copy(BAI_HOME);setWorld(0);mamaReset();
  winShowAt=0;fws.forEach(f=>f.parts.forEach(([m])=>scene.remove(m)));fws.length=0;}
 function fight(t,dt){
  if(!gameOver&&t>nextSpawn){spawn();nextSpawn+=5/SPEED;}
@@ -918,7 +921,7 @@ function kerstinFrame(t,b,dt){
  if(K.state!=='off'){
   const stag=t<K.staggerUntil;
   if(!gameOver){K.r+=K.vel*dt;K.vel*=Math.exp(-dt*4);
-   if(K.state==='in'&&!stag&&K.r>1.05)K.r=Math.max(1.05,K.r-(.85+.15*K.level)*SPEED*dt);
+   if(K.state==='in'&&!stag&&!K.held&&K.r>1.05)K.r=Math.max(1.05,K.r-(.85+.15*K.level)*SPEED*dt);
    if(K.state==='leaving')K.r+=2.2*dt;}
   if(K.state==='in'&&K.r>10.5){K.state='leaving';score+=5;elScore.textContent=score;banner.hidden=true;pushBtn.hidden=true;kSay('Na gut … diesmal noch!',t,2.2);}
   if(K.state==='leaving'&&K.r>17){K.state='off';kRoot.visible=false;K.level++;K.next=t+25;}
@@ -928,7 +931,7 @@ function kerstinFrame(t,b,dt){
   if(stag)Object.assign(target,{sx:-.5,hdx:-.35,lSz:1.7,rSz:-1.7,lSx:-.6,rSx:-.6,lE:-.3,rE:-.3,kL:.3,kR:.05});
   const a=1-Math.exp(-dt*14);for(const k in target)kShown[k]+=(target[k]-kShown[k])*a;
   apply(kShown,KER);
-  if(K.state==='in'&&K.r<2.4&&!gameOver){stageMeter=Math.max(0,stageMeter-dt*.12*(1+.25*K.level));
+  if(K.state==='in'&&K.r<2.4&&!K.held&&!gameOver){stageMeter=Math.max(0,stageMeter-dt*.12*(1+.25*K.level));
     if(stageMeter<=0)endGame('Kerstin hat die Tanzfläche übernommen.');}}
  if(!(K.state==='in'&&K.r<2.4))stageMeter=Math.min(1,stageMeter+dt*.04);
  elStage.style.width=(stageMeter*100).toFixed(1)+'%';elStage.classList.toggle('low',stageMeter<.35);
@@ -1042,9 +1045,9 @@ function makeChar(o){const r=root.clone(true),legSet=new Set();['lp0','lp1'].for
   else if(o.pants&&x.parent===h&&m===bodice)x.material=o.pants;
   else if(m===bodice)x.material=o.top;
   else if(m===blouse)x.material=o.blouse||o.top;
-  else if(m===hairM){if(o.pants&&x.scale.y>1.5)x.visible=false;else x.material=o.hair;}
+  else if(m===hairM){if(o.pants&&!o.tail&&x.scale.y>1.5)x.visible=false;else x.material=o.hair;}
   else if(m===skirtM&&o.skirt)x.material=o.skirt;else if(m===apronM&&o.apron)x.material=o.apron;});
- if(o.pants){r.getObjectByName('skirt').visible=false;r.getObjectByName('tailP').visible=false;}
+ if(o.pants){r.getObjectByName('skirt').visible=false;if(!o.tail)r.getObjectByName('tailP').visible=false;}
  r.scale.setScalar(o.scale||1);r.visible=false;scene.add(r);return {r,rig:rigOf(r),shown:pose(0,0)};}
 const MEN=makeChar({pants:M(0x55585e),top:M(0x3e6b48),hair:M(0x9a9a9a),scale:1.12});
 dball(.05,M(0x6e6e6e,{roughness:.8}),1.7,.5,.6,0,.168,.238,MEN.rig.headP);
@@ -1093,6 +1096,45 @@ function usePerk(){if(!perk||paused||gameOver||MC.state!=='off')return;perk=fals
 perkBtn.addEventListener('click',usePerk);
 function mcReset0(){MC.state='off';MEN.r.visible=CHR.r.visible=false;mBubble.hidden=cBubble.hidden=true;}
 
+/* ---------- Mama on her e-scooter: once per level she sends Kerstin home ---------- */
+const MAMA_C=makeChar({pants:M(0x2f4f7f),top:M(0xf08a8a),hair:M(0xf0d58c,{roughness:.45}),tail:true});
+MAMA_C.r.scale.set(.94,1.06,.94);MAMA_C.r.visible=true;MAMA_C.r.position.y=.13;
+const mamaG=new THREE.Group();mamaG.visible=false;scene.add(mamaG);mamaG.add(MAMA_C.r);
+const mamaWheels=[];
+{const dk=M(0x1d1f26,{roughness:.5}),al=M(0x9aa3b0,{metalness:.7,roughness:.3});
+ box(.24,.05,.95,dk,0,.1,0,mamaG);
+ [.42,-.42].forEach(z=>{const w=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,.05,16),dk);w.rotation.z=Math.PI/2;w.position.set(0,.09,z);add(w,mamaG);mamaWheels.push(w);});
+ const stem=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,1.05,8),al);stem.position.set(0,.62,.44);stem.rotation.x=-.18;add(stem,mamaG);
+ box(.55,.04,.04,al,0,1.13,.53,mamaG);const lamp=new THREE.Mesh(new THREE.SphereGeometry(.05,10,8),B(0x7fe0ff));lamp.position.set(0,.95,.53);mamaG.add(lamp);}
+const MAMA={state:'off',used:-1,t:0,reply:false},M_ENTRY=new THREE.Vector3(-13,0,11),mmV=new THREE.Vector3(),mmT=new THREE.Vector3();
+const maBubble=document.getElementById('mabubble');
+function ridePose(){return Object.assign(pose(0,0),{hx:0,hrz:0,sz:0,hdz:0,lSx:-1.15,rSx:-1.15,lSz:.12,rSz:-.12,lE:-.35,rE:-.35,kL:.18,kR:.18,sx:.08,tz:.45});}
+function scoldPose(t){return Object.assign(pose(0,0),{hx:0,hrz:0,sz:0,rSx:-1.7,rSz:-.25+.25*Math.sin(t*14),rE:-.2,lSz:.9,lSx:.2,lE:-1.9,sx:-.05,hdz:.12*Math.sin(t*7),kL:.12,kR:.12,tz:.2*Math.sin(t*7)});}
+function mamaReset(){MAMA.state='off';MAMA.used=-1;mamaG.visible=false;maBubble.hidden=true;K.held=false;}
+function mamaFrame(t,dt){
+ if(!gameOver&&MAMA.state==='off'&&MAMA.used!==world&&K.state==='in'&&K.r<2.4){
+  Object.assign(MAMA,{state:'in',used:world,t,reply:false});mamaG.visible=true;mamaG.position.copy(M_ENTRY);K.held=true;toast('Mama kommt mit dem E-Scooter!',true);
+  if(soundOn){const a=ac.currentTime;const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(500,a);o.frequency.linearRampToValueAtTime(1100,a+.9);
+   g.gain.setValueAtTime(.06,a);g.gain.exponentialRampToValueAtTime(.001,a+1.1);o.connect(g);g.connect(master);o.start(a);o.stop(a+1.15);}}
+ if(MAMA.state==='off')return;
+ if(MAMA.state!=='out'&&K.state!=='in'){MAMA.state='out';K.held=false;}
+ let p=null,say='',moving=false;
+ if(MAMA.state==='in'){mmT.set(kRoot.position.x,0,kRoot.position.z);const out=mmT.length()||1;mmT.multiplyScalar((out+1.3)/out);
+  mmV.subVectors(mmT,mamaG.position);mmV.y=0;const d=mmV.length();
+  if(d<.15){MAMA.state='scold';MAMA.t=t;if(soundOn){const a=ac.currentTime;[0,.22,.44].forEach(x=>tone('sawtooth',300-x*120,a+x,.16,.12,1200));}}
+  else{mamaG.position.addScaledVector(mmV,Math.min(1,7*dt/d));mamaG.lookAt(mmT.x,0,mmT.z);moving=true;}
+  p=ridePose();say='KERSTIN!!!';}
+ if(MAMA.state==='scold'){const u=t-MAMA.t;mamaG.lookAt(kRoot.position.x,0,kRoot.position.z);kRoot.lookAt(mamaG.position.x,0,mamaG.position.z);p=scoldPose(t);
+  say=u<1.5?'Kerstin! Lass deine Schwester tanzen!':'Ab nach Hause, aber zackig!';
+  if(u>1.7&&!MAMA.reply){MAMA.reply=true;kSay('Menno … ja, Mama.',t,1.8);}
+  if(u>3.2){K.state='leaving';K.held=false;banner.hidden=true;pushBtn.hidden=true;MAMA.state='out';toast('Mama hat Kerstin heimgeschickt!',true);}}
+ if(MAMA.state==='out'){mmV.subVectors(M_ENTRY,mamaG.position);mmV.y=0;const d=mmV.length();
+  if(d<.2){MAMA.state='off';mamaG.visible=false;maBubble.hidden=true;return;}
+  mamaG.position.addScaledVector(mmV,Math.min(1,7*dt/d));mamaG.lookAt(M_ENTRY.x,0,M_ENTRY.z);p=ridePose();moving=true;}
+ if(moving)mamaWheels.forEach(w=>w.rotation.x+=dt*40);
+ if(p)charPose(MAMA_C,p,dt);
+ if(say)bubbleAt(maBubble,MAMA_C,say,2.6);else maBubble.hidden=true;}
+
 const kv=new THREE.Vector3();
 function endGame(msg,title='GAME OVER'){gameOver=true;document.getElementById('overTitle').textContent=title;document.getElementById('overMsg').textContent=msg;document.getElementById('overScore').textContent=score;overEl.hidden=false;banner.hidden=true;pushBtn.hidden=true;}
 function clearField(t){goblins.forEach(o=>{if(o.alive){o.alive=false;scene.remove(o.g);poof(o.g.position,0xffffff);}});shots.forEach(s=>scene.remove(s.m));shots.length=0;
@@ -1137,7 +1179,7 @@ function frame(){requestAnimationFrame(frame);
  if(m!==lastMove){lastMove=m;spinBase=Math.round(spin/TAU)*TAU;elName.textContent=MOVES[m][0];elText.textContent=MOVES[m][1];}
  const target=pose(m,b),a=1-Math.exp(-dt*14);for(const k in target)shown[k]+=(target[k]-shown[k])*a;
  const spinT=m===2?spinBase+2*TAU*sm(0,8,local):Math.round(spin/TAU)*TAU;spin+=(spinT-spin)*(1-Math.exp(-dt*10));
- apply(shown);root.rotation.y=spin;bobFrame(m,b,t,dt);fight(t,dt);kerstinFrame(t,b,dt);sammiFrame(t,dt);robiFrame(t,b,dt);mcFrame(t,b,dt);
+ apply(shown);root.rotation.y=spin;bobFrame(m,b,t,dt);fight(t,dt);kerstinFrame(t,b,dt);sammiFrame(t,dt);robiFrame(t,b,dt);mcFrame(t,b,dt);mamaFrame(t,dt);
  if(!gameOver){if(world<WORLD_AT.length&&score>=WORLD_AT[world])enterWorld(world+1,t);if(score>=WIN_AT)winGame(t);}
  worldFrame(t,dt);
  if((K.state==='in')!==bPush){bPush=!bPush;padBLabel.textContent=bPush?'Drängen':'Rolle';padB.classList.toggle('alert',bPush);padB.setAttribute('aria-label',bPush?'B: Kerstin zurückdrängen':'B: Baileys rollt');}
