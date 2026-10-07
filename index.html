@@ -210,6 +210,7 @@ body.gb #fmtBtn{position:fixed;z-index:6;top:calc(18px + env(safe-area-inset-top
 <div class="intro" id="intro"><div>Salzburg, Altstadt, 21:04<small>Gameplay Preview</small></div></div>
 
 <div class="bubble" id="bubble" hidden>Salzburg!</div>
+<div class="bubble" id="bbubble" hidden></div>
 <div class="flash" id="flash"></div>
 <div class="bubble rival" id="kbubble" hidden></div>
 <div class="bubble joker" id="sbubble" hidden>WAU! WAU! WAU!</div>
@@ -923,7 +924,7 @@ function kerstinFrame(t,b,dt){
   if(!gameOver){K.r+=K.vel*dt;K.vel*=Math.exp(-dt*4);
    if(K.state==='in'&&!stag&&!K.held&&K.r>1.05)K.r=Math.max(1.05,K.r-(.85+.15*K.level)*SPEED*dt);
    if(K.state==='leaving')K.r+=2.2*dt;}
-  if(K.state==='in'&&K.r>10.5){K.state='leaving';score+=5;elScore.textContent=score;banner.hidden=true;pushBtn.hidden=true;kSay('Na gut … diesmal noch!',t,2.2);}
+  if(K.state==='in'&&K.r>10.5){K.state='leaving';score+=10;elScore.textContent=score;banner.hidden=true;pushBtn.hidden=true;kSay('Na gut … diesmal noch!',t,2.2);}
   if(K.state==='leaving'&&K.r>17){K.state='off';kRoot.visible=false;K.level++;K.next=t+25;}
   kRoot.position.set(Math.sin(K.a)*K.r,0,Math.cos(K.a)*K.r);
   if(K.state==='leaving')kRoot.lookAt(kRoot.position.x*2,0,kRoot.position.z*2);else kRoot.lookAt(0,0,0);
@@ -962,9 +963,9 @@ function toast(msg,good){toastEl.textContent=msg;toastEl.className='toast '+(goo
 function barkSound(when){const t=ac.currentTime+when,o=ac.createOscillator(),f=ac.createBiquadFilter(),g=ac.createGain();o.type='sawtooth';
  o.frequency.setValueAtTime(760,t);o.frequency.exponentialRampToValueAtTime(380,t+.13);f.type='bandpass';f.frequency.value=1100;f.Q.value=1.2;
  g.gain.setValueAtTime(.7,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);o.connect(f);f.connect(g);g.connect(master);o.start(t);o.stop(t+.18);noise(t,.09,.35,'bandpass',1600);}
-function sammiCall(t){if(!sam.visible){sam.visible=true;sam.position.copy(SAM.exit);}
+function sammiCall(t){if(!sam.visible){sam.visible=true;sam.position.copy(SAM.exit);biciSay('Sammy, bei Fuß!',t,1.8);}
  SAM.until=t+4;SAM.barks=[t+.45,t+.75,t+1.05];if(soundOn)[.45,.75,1.05].forEach(barkSound);}
-function sammiHunt(t){const g=nearest()||goblins.find(o=>o.alive);if(!sam.visible){sam.visible=true;sam.position.copy(SAM.exit);}
+function sammiHunt(t){const g=nearest()||goblins.find(o=>o.alive);if(!sam.visible){sam.visible=true;sam.position.copy(SAM.exit);biciSay('Sammy, bei Fuß!',t,1.8);}
  SAM.target=g||null;if(g)g.targeted=true;SAM.until=t+(g?8:3);
  if(!g){SAM.barks=[t+.45,t+.75,t+1.05];if(soundOn)[.45,.75,1.05].forEach(barkSound);}}
 function damage(o,t){const blocked=Math.random()<.5;sammiCall(t);
@@ -1169,8 +1170,9 @@ function togglePause(want=!paused){if(want===paused||(want&&gameOver))return;pau
  if(document.getAnimations)document.getAnimations().forEach(a=>paused?a.pause():a.play());
  pauseEl.hidden=!paused;pauseBtn.querySelector('.pl').textContent=paused?'Weiter':'Pause';pauseBtn.querySelector('.pi').textContent=paused?'▶':'❚❚';pauseBtn.setAttribute('aria-label',paused?'Weiter':'Pause');if(paused)document.getElementById('resumeBtn').focus();}
 
-let last=gnow(),introUntil=3.2,saidCycle=-1;const head3=new THREE.Vector3(),bubble=document.getElementById('bubble');
-function speak(){if(!soundOn||!window.speechSynthesis)return;try{const u=new SpeechSynthesisUtterance('Salzburg!');u.lang='de-AT';u.pitch=1.5;u.rate=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}const look=new THREE.Vector3();
+let last=gnow(),introUntil=3.2,saidCycle=-1;const head3=new THREE.Vector3(),bubble=document.getElementById('bubble'),bBubble=document.getElementById('bbubble');let biciSayUntil=0;
+function biciSay(txt,t,d){bBubble.textContent=txt;biciSayUntil=t+d;speak(txt);}
+function speak(txt='Salzburg!'){if(!soundOn||!window.speechSynthesis)return;try{const u=new SpeechSynthesisUtterance(txt);u.lang='de-AT';u.pitch=1.5;u.rate=1.05;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}const look=new THREE.Vector3();
 function frame(){requestAnimationFrame(frame);
  if(paused){renderer.render(scene,camera);return;}
  const now=gnow(),dt=Math.min(.05,(now-last)/1000);
@@ -1197,7 +1199,8 @@ function frame(){requestAnimationFrame(frame);
  if(shakeAmt>.002){camera.position.x+=(Math.random()-.5)*shakeAmt;camera.position.y+=(Math.random()-.5)*shakeAmt;}
  if(introUntil&&t>introUntil){intro.style.opacity=0;introUntil=0;}
  elBeat.textContent=Math.floor(b);elCombo.textContent='×'+(1+Math.floor(local))*(m===2?2:1);
- const say=m===4&&local>=3&&local<7.6;bubble.hidden=!say;
+ const bSay=t<biciSayUntil,say=m===4&&local>=3&&local<7.6&&!bSay;bubble.hidden=!say;bBubble.hidden=!bSay;
+ if(bSay){head3.set(0,2.35+root.position.y,0).project(camera);bBubble.style.left=((head3.x+1)/2*SR.width+SR.left+18)+'px';bBubble.style.top=((1-head3.y)/2*SR.height+SR.top)+'px';}
  if(say){head3.set(0,2.35+root.position.y,0).project(camera);bubble.style.left=((head3.x+1)/2*SR.width+SR.left+18)+'px';bubble.style.top=((1-head3.y)/2*SR.height+SR.top)+'px';
    const cyc=Math.floor(b/8);if(cyc!==saidCycle){saidCycle=cyc;speak();}}
  renderer.render(scene,camera);}
