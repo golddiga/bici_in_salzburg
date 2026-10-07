@@ -37,22 +37,27 @@ bellt laut. Mit 50 % Chance verbellt er den Goblin und der Schaden fällt weg, s
 **Dev-Modus:** `?dev` an die Adresse hängen (z. B. `…/bici_in_salzburg/?dev`), dann gibt es oben
 Buttons für +50 und +150 Punkte, um Welten und Level-ups direkt zu testen.
 
-## Welten und Level
+## Level
 
-| Punkte | Welt | Besonderheit |
+Alle 150 Punkte geht es automatisch in ein neues Level, und jedes Level macht die Goblins 10 % schneller.
+
+| Level | ab Punkten | Ort |
 |---|---|---|
-| 0–149 | Residenzplatz | Start |
-| 150–299 | Festung Hohensalzburg | Burghof mit Linde und Brunnen, Alpen am Horizont |
-| 300–499 | Mirabellgarten | alles 20 % schneller, Blick auf die Festung |
-| 500 | Sieg | Gewinn-Bildschirm |
+| 1 | 0 | Residenzplatz |
+| 2 | 150 | Festung Hohensalzburg: Burghof mit Linde und Brunnen, Alpen am Horizont |
+| 3 | 300 | Mirabellgarten: Blumenbeete, Statuen, Blick auf die Festung |
+| 4 | 450 | Weihnachtsmarkt am Residenzplatz: Schnee, Buden, Christbaum |
+| 5 | 600 | Festung Hohenwerfen: Burg auf dem Felsen, Berge, kreisende Greifvögel |
+| 6 | 750 | Salzburg Hauptbahnhof: Bahnsteig, Glasdach, Abfahrtstafel, durchfahrender Zug |
+| 7 | 900 | Getreidegasse: Zunftschilder, Mozarts Geburtshaus |
+| Finale | 1000 | Gaisberg-Gipfel: Siegestanz mit Feuerwerk über den Lichtern Salzburgs, dann Sieg |
 
-- **Alle 50 Punkte** steigt das Level; die Goblins werden je Level 10 % schneller.
-- **Joker Sammi** kommt bei jedem Level-up (und manchmal einfach, wenn er Lust hat) und erledigt einen Goblin.
+- **Alle 50 Punkte** kommt **Joker Sammi** (und manchmal einfach, wenn er Lust hat) und erledigt einen Goblin.
   Wenn Bici Schaden nehmen würde, bellt er weiterhin mit 50 % Chance den Goblin weg.
-- **Robi aus Beham** hilft ab Level 3 bei jedem Level-up.
+- **Robi aus Beham** hilft ab 100 Punkten ebenfalls alle 50 Punkte.
 - **Menei & Christine** sind ab 100 Punkten ein Perk: Er wird gespart und mit **C** (bzw. Perk-Knopf) eingesetzt,
   dann schreit Christine alle Goblins weg. Einen neuen Perk gibt es erst, wenn der alte ausgegeben ist:
-  alle 100 Punkte, im Mirabellgarten alle 50.
+  alle 100 Punkte, ab dem Mirabellgarten alle 50.
 - **Baileys** (R): rollt; manchmal rollt er in Richtung der Goblins, walzt alle auf seiner Bahn platt,
   rollt hinaus und kommt zurück.
 

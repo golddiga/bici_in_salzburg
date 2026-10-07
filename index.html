@@ -538,14 +538,123 @@ const _mi0=new Set(scene.children);
  lampsAt([[-3.6,-9.5],[3.6,-9.5],[-3.6,9.5],[3.6,9.5]]);}
 const W_MIRA=collect(_mi0);
 
-/* ---------- worlds: Residenzplatz, Festung from 150, Mirabellgarten from 300, victory at 500 ---------- */
+/* ---------- level 4: Weihnachtsmarkt on the Residenzplatz (overlay on level 1) ---------- */
+let snowPts=null;const birds=[],towerLights=[],fws=[];let trainG=null,winShowAt=0,nextFw=0;
+const _xm0=new Set(scene.children);
+{const cover=new THREE.Mesh(new THREE.PlaneGeometry(60,50),M(0xffffff,{transparent:true,opacity:.55,roughness:1}));cover.rotation.x=-Math.PI/2;cover.position.set(0,.012,-6);add(cover,scene,false);
+ const wood=M(0x6b4528),roofR=M(0xb3262e,{flatShading:true}),roofG=M(0x2f6b3a,{flatShading:true}),snowM=M(0xf4f6fb,{flatShading:true});
+ [[-10,-10],[-10,-4.5],[-10,1],[-10,6.5],[10,-10],[10,-4.5],[10,1],[10,6.5]].forEach(([x,z],i)=>{const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=x<0?Math.PI/2:-Math.PI/2;scene.add(g);
+   box(2.6,2.2,1.6,wood,0,1.1,0,g);box(2.3,.85,.1,winLit,0,1.4,.81,g);box(2.8,.12,.5,wood,0,.95,1,g);
+   const rf=new THREE.Mesh(roofGeo(3.1,1.1,2.1),i%2?roofR:roofG);rf.position.y=2.2;add(rf,g);
+   const sn=new THREE.Mesh(roofGeo(1.4,.5,2.15),snowM);sn.position.y=2.75;add(sn,g);
+   for(let k=0;k<6;k++){const b=new THREE.Mesh(new THREE.SphereGeometry(.07,8,6),B(bulbCols[(k+i)%4]));b.position.set(-1.25+k*.5,2.15,1.05);g.add(b);bulbs.push(b);}});
+ const tg=new THREE.Group();tg.position.set(5.5,0,-9);scene.add(tg);const needle=M(0x1f4a2c,{flatShading:true});
+ const tr=new THREE.Mesh(new THREE.CylinderGeometry(.25,.35,1.2,8),M(0x4a3628));tr.position.y=.6;add(tr,tg);
+ [[2.4,3,1.8],[1.9,2.6,3.5],[1.4,2.2,5],[.9,1.8,6.3]].forEach(([rr,h,y])=>{const c=new THREE.Mesh(new THREE.ConeGeometry(rr,h,10),needle);c.position.y=y;add(c,tg);});
+ const star=new THREE.Mesh(new THREE.OctahedronGeometry(.4),B(0xffd23a));star.position.y=7.5;tg.add(star);
+ for(let i=0;i<46;i++){const y=1+rnd()*6,rr=2.3*(1-(y-.4)/7.2)+.15,a=rnd()*TAU;const b=new THREE.Mesh(new THREE.SphereGeometry(.08,8,6),B(bulbCols[i%4]));b.position.set(Math.cos(a)*rr,y,Math.sin(a)*rr);tg.add(b);bulbs.push(b);}
+ const NSN=700,snp=new Float32Array(NSN*3);for(let i=0;i<NSN;i++)snp.set([rnd()*50-25,rnd()*20,rnd()*45-30],i*3);
+ const sng=new THREE.BufferGeometry();sng.setAttribute('position',new THREE.BufferAttribute(snp,3));
+ snowPts=new THREE.Points(sng,new THREE.PointsMaterial({color:0xffffff,size:.14,map:dot(),transparent:true,depthWrite:false}));scene.add(snowPts);}
+const W_XMAS=collect(_xm0);
+
+/* ---------- level 5: Festung Hohenwerfen on its rock, birds of prey circling ---------- */
+const _we0=new Set(scene.children);
+{const gr=new THREE.Mesh(new THREE.CircleGeometry(18,40),M(0x3b5a34));gr.rotation.x=-Math.PI/2;add(gr,scene,false);
+ const terr=new THREE.Mesh(new THREE.CircleGeometry(7,40),M(0x8f8a82,{map:plaster}));terr.rotation.x=-Math.PI/2;terr.position.y=.008;add(terr,scene,false);
+ const rock=M(0x6b6660,{flatShading:true});const cl=new THREE.Mesh(new THREE.CylinderGeometry(18,26,40,12),rock);cl.position.y=-20.02;add(cl,scene,false);
+ const vb=new THREE.Mesh(new THREE.PlaneGeometry(600,600),M(0x24361f));vb.rotation.x=-Math.PI/2;vb.position.y=-40;add(vb,scene,false);
+ const ww=M(0xe6e1d6,{map:plaster,bumpMap:plaster,bumpScale:.03,emissive:0x2a2418,emissiveIntensity:.35}),rr=M(0x3b3f4a,{flatShading:true});
+ box(16,10,8,ww,0,5,-18);const r1=new THREE.Mesh(roofGeo(16.8,4,8.6),rr);r1.position.set(0,10,-18);add(r1);
+ for(let row=0;row<2;row++)for(let k=0;k<6;k++)box(.7,1,.1,rnd()<.6?winLit:winDark,-6.2+k*2.5,4+row*2.6,-13.95);
+ box(3.2,20,3.2,ww,-4,10,-14);const sp=new THREE.Mesh(new THREE.ConeGeometry(2.4,7,8),rr);sp.rotation.y=Math.PI/8;sp.position.set(-4,23.5,-14);add(sp);
+ const tw=new THREE.Mesh(new THREE.CylinderGeometry(2.6,2.8,14,16),ww);tw.position.set(6,7,-13);add(tw);const tc=new THREE.Mesh(new THREE.ConeGeometry(3.2,4,16),rr);tc.position.set(6,16,-13);add(tc);
+ [-14,14].forEach(wx=>{box(1.2,4,20,ww,wx,2,-6);for(let i=0;i<12;i++)box(1.26,.8,.8,ww,wx,4.4,-15.2+i*1.67);});
+ const snow=M(0xe8ecf6,{flatShading:true,emissive:0x303850,emissiveIntensity:.4});
+ [[-55,-60,30,60],[-10,-95,40,78],[45,-70,34,62],[85,-20,30,50],[-85,-10,28,48],[30,75,30,50],[-40,75,32,55]].forEach(([mx,mz,rad,h])=>{const m=new THREE.Mesh(new THREE.ConeGeometry(rad,h,7),rock);m.position.set(mx,h/2-30,mz);add(m,scene,false);
+   const sn=new THREE.Mesh(new THREE.ConeGeometry(rad*.3,h*.3,7),snow);sn.position.set(mx,h-30-h*.15,mz);add(sn,scene,false);});
+ const fm=M(0x4a3524,{roughness:.8});
+ for(let i=0;i<3;i++){const g=new THREE.Group();scene.add(g);const bd=new THREE.Mesh(new THREE.SphereGeometry(.22,10,8),fm);bd.scale.set(.8,.7,2);g.add(bd);
+   const wings=[1,-1].map(sd=>{const w=new THREE.Group();w.position.x=.12*sd;g.add(w);const m=new THREE.Mesh(new THREE.BoxGeometry(1.5,.04,.5),fm);m.position.x=.75*sd;w.add(m);return w;});
+   birds.push({g,wings});}
+ lampsAt([[-7,-3],[7,-3],[-7,7],[7,7]]);}
+const W_WERF=collect(_we0);
+
+/* ---------- level 6: Salzburg Hauptbahnhof, a train passes through ---------- */
+const _hb0=new Set(scene.children);
+{const conc=noiseTex(128,(x,sz)=>{x.fillStyle='#8d8f93';x.fillRect(0,0,sz,sz);for(let i=0;i<2500;i++){const l=48+rnd()*20;x.fillStyle=`hsl(220,4%,${l}%)`;x.fillRect(rnd()*sz,rnd()*sz,1+rnd()*2,1+rnd()*2);}},8);
+ box(70,1,28,M(0xa7a9ad,{map:conc}),0,-.5,0);box(70,.02,.25,M(0xffd23a,{emissive:0x5a4a08,emissiveIntensity:.6}),0,.011,-13.4);
+ const bed=new THREE.Mesh(new THREE.PlaneGeometry(400,30),M(0x3a3632));bed.rotation.x=-Math.PI/2;bed.position.set(0,-1,-28);add(bed,scene,false);
+ const steel=M(0x8a8f99,{metalness:.7,roughness:.35}),wood=M(0x5a4232);
+ [-16.2,-23].forEach(tz=>{box(220,.15,.1,steel,0,-.85,tz-.72);box(220,.15,.1,steel,0,-.85,tz+.72);for(let i=0;i<70;i++)box(.3,.1,2.4,wood,-70+i*2,-.95,tz);});
+ trainG=new THREE.Group();trainG.position.set(-110,-.85,-16.2);scene.add(trainG);
+ const red=M(0xc8102e,{roughness:.5}),grey=M(0x9a9ea6);
+ for(let c=0;c<4;c++){const cx=c*18.6;box(18,3.4,3,red,cx,2,0,trainG);box(18,.18,3.02,M(0xf4f4f4),cx,1.3,0,trainG);box(18.02,.9,3.04,winLit,cx,2.5,0,trainG);box(17.6,.3,2.6,grey,cx,3.85,0,trainG);}
+ [-24,-16,-8,0,8,16,24].forEach(cx=>{box(.35,8,.35,steel,cx,4,-11);box(.35,8,.35,steel,cx,4,11);box(.25,.4,23,steel,cx,8.1,0);});
+ const glass=new THREE.Mesh(new THREE.BoxGeometry(56,.12,24),M(0x9fb3c8,{transparent:true,opacity:.22,metalness:.3,roughness:.1}));glass.position.y=8.4;add(glass,scene,false);
+ const board=document.createElement('canvas');board.width=512;board.height=256;const bx=board.getContext('2d');bx.fillStyle='#0d1830';bx.fillRect(0,0,512,256);
+ bx.fillStyle='#ffb000';bx.font='bold 34px monospace';bx.fillText('ABFAHRT',20,46);bx.font='26px monospace';
+ [['23:58','Wien Hbf','3'],['00:12','München Hbf','5'],['00:30','Bischofshofen','2'],['00:41','Bad Ischl','7']].forEach(([tm,dst,gl],i)=>{bx.fillText(tm,20,100+i*44);bx.fillText(dst,120,100+i*44);bx.fillText(gl,470,100+i*44);});
+ const bt=new THREE.CanvasTexture(board);bt.encoding=THREE.sRGBEncoding;
+ box(.2,2.6,.2,steel,-6,6.7,-8);const bm=new THREE.Mesh(new THREE.BoxGeometry(5,2.5,.2),[grey,grey,grey,grey,B(0xffffff,{map:bt}),grey]);bm.position.set(-6,4.9,-8);add(bm);
+ const clock=document.createElement('canvas');clock.width=clock.height=128;const cx2=clock.getContext('2d');cx2.fillStyle='#fff';cx2.beginPath();cx2.arc(64,64,62,0,TAU);cx2.fill();
+ cx2.strokeStyle='#111';cx2.lineWidth=6;cx2.beginPath();cx2.moveTo(64,64);cx2.lineTo(64,14);cx2.moveTo(64,64);cx2.lineTo(94,64);cx2.stroke();for(let i=0;i<12;i++){const a=i/12*TAU;cx2.fillRect(64+Math.cos(a)*52-3,64+Math.sin(a)*52-3,6,6);}
+ const ct=new THREE.CanvasTexture(clock);ct.encoding=THREE.sRGBEncoding;const cm=new THREE.Mesh(new THREE.CircleGeometry(.9,32),B(0xffffff,{map:ct}));cm.position.set(6,5.6,-7.9);scene.add(cm);box(.15,2.4,.15,steel,6,7.2,-8);
+ [[-9,4],[9,4],[-3,9],[3,9]].forEach(([bx2,bz])=>{box(2.4,.12,.6,wood,bx2,.5,bz);box(2.4,.6,.1,wood,bx2,.85,bz+.28);box(.1,.5,.5,steel,bx2-1,.25,bz);box(.1,.5,.5,steel,bx2+1,.25,bz);});
+ box(70,10,1,M(0x2a3046),0,5,14.5);for(let i=0;i<20;i++)box(2.2,1.6,.1,rnd()<.7?winLit:winDark,-31+i*3.3,6,13.95);
+ lampsAt([[-7,-3],[7,-3],[-7,7],[7,7]]);}
+const W_HBF=collect(_hb0);
+
+/* ---------- level 7: Getreidegasse with guild signs and Mozart's birthplace ---------- */
+const _gg0=new Set(scene.children);
+{const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');x.fillStyle='#5a534c';x.fillRect(0,0,256,256);
+ for(let row=0;row<16;row++)for(let k=0;k<17;k++){const l=44+rnd()*20;x.fillStyle=`hsl(30,8%,${l}%)`;x.beginPath();x.rect(k*16-(row%2)*8+1.5,row*16+1.5,13,13);x.fill();}
+ const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(4,14);t.anisotropy=8;t.encoding=THREE.sRGBEncoding;
+ const g=new THREE.Mesh(new THREE.PlaneGeometry(16,80),M(0xb0a596,{map:t,bumpMap:t,bumpScale:.06}));g.rotation.x=-Math.PI/2;g.position.z=-10;add(g,scene,false);
+ const zs=[-30,-25.4,-20.8,-16.2,-11.6,-7,-2.4,2.2,6.8,11.4,16,20.6];
+ zs.forEach((z,i)=>{house(-11,z,Math.PI/2,4.4,9+rnd()*5,7,true);if(i!==4)house(11,z,-Math.PI/2,4.4,9+rnd()*5,7,true);});
+ const mg=new THREE.Group();mg.position.set(11,0,-11.6);mg.rotation.y=-Math.PI/2;scene.add(mg);
+ box(4.4,13,7,M(0xf2c14e,{map:plaster,bumpMap:plaster,bumpScale:.03}),0,6.5,0,mg);const mr=new THREE.Mesh(roofGeo(4.8,2,7.4),roofMat);mr.position.y=13;add(mr,mg);
+ for(let row=0;row<4;row++)for(let k=0;k<3;k++)box(.62,.95,.08,rnd()<.6?winLit:winDark,-1.3+k*1.3,3+row*2.4,3.53,mg);box(.95,1.9,.1,doorMat,0,.95,3.54,mg);
+ const mc=document.createElement('canvas');mc.width=512;mc.height=64;const mx=mc.getContext('2d');mx.fillStyle='#f2c14e';mx.fillRect(0,0,512,64);
+ mx.fillStyle='#3a2a14';mx.font='bold 36px Georgia,serif';mx.textAlign='center';mx.textBaseline='middle';mx.fillText('MOZARTS GEBURTSHAUS',256,34);
+ const mt=new THREE.CanvasTexture(mc);mt.encoding=THREE.sRGBEncoding;const ms=new THREE.Mesh(new THREE.PlaneGeometry(4,.5),B(0xffffff,{map:mt}));ms.position.set(0,2.35,3.56);mg.add(ms);
+ house(0,-36,0,15,13,6,false);
+ [-12,-4,4,12].forEach(z=>{const pts=[];for(let i=0;i<=16;i++){const u=i/16,px=-7.5+15*u,py=6.6-1.4*(1-(2*u-1)**2);pts.push(new THREE.Vector3(px,py,z));
+   if(i>0&&i<16){const b=new THREE.Mesh(new THREE.SphereGeometry(.1,8,6),B(bulbCols[i%4]));b.position.set(px,py-.12,z);scene.add(b);bulbs.push(b);}}
+   scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:new THREE.Color(0x14121c).convertSRGBToLinear()})));});
+ lampsAt([[-6.8,-6],[6.8,2],[-6.8,10],[6.8,-16]]);}
+const W_GET=collect(_gg0);
+
+/* ---------- finale: Gaisberg summit above the lights of Salzburg ---------- */
+const _ga0=new Set(scene.children);
+{const m=new THREE.Mesh(new THREE.CircleGeometry(30,48),M(0x35552f));m.rotation.x=-Math.PI/2;add(m,scene,false);
+ const hill=new THREE.Mesh(new THREE.SphereGeometry(30,24,12,0,TAU,Math.PI/2,Math.PI/2),M(0x2a4228,{flatShading:true}));hill.scale.y=.9;hill.position.y=-.02;add(hill,scene,false);
+ const N=1800,cp=new Float32Array(N*3),cc=new Float32Array(N*3);
+ for(let i=0;i<N;i++){const a=Math.PI+(rnd()-.5)*2.2,rad=45+rnd()*150;cp.set([Math.sin(a)*rad,-55+rnd()*2,Math.cos(a)*rad],i*3);const col=new THREE.Color(rnd()<.8?0xffc070:0xfff4e0).convertSRGBToLinear();cc.set([col.r,col.g,col.b],i*3);}
+ const cg=new THREE.BufferGeometry();cg.setAttribute('position',new THREE.BufferAttribute(cp,3));cg.setAttribute('color',new THREE.BufferAttribute(cc,3));
+ scene.add(new THREE.Points(cg,new THREE.PointsMaterial({size:.9,map:dot(),vertexColors:true,transparent:true,depthWrite:false,fog:false,blending:THREE.AdditiveBlending})));
+ const mast=new THREE.Mesh(new THREE.CylinderGeometry(.25,.9,38,6),M(0xb9bcc4,{metalness:.5,roughness:.4}));mast.position.set(-10,19,-12);add(mast);
+ [12,24,37].forEach(h=>{const l=new THREE.Mesh(new THREE.SphereGeometry(.3,10,8),B(0xff2030,{fog:false}));l.position.set(-10,h,-12);scene.add(l);towerLights.push(l);});
+ const cw=M(0x5a4232);box(.3,4.5,.3,cw,8,2.25,-12);box(2.2,.3,.3,cw,8,3.4,-12);
+ box(2.4,.12,.6,cw,4,.5,6);box(2.4,.6,.1,cw,4,.85,6.28);
+ lampsAt([[-6,5],[6,-4]]);}
+const W_GAIS=collect(_ga0);
+
+/* ---------- worlds: a new level every 150 points (each 10 % faster), victory at 1000 ---------- */
 const WORLDS=[
- {name:'Residenzplatz',short:'Residenz',intro:'Salzburg, Residenzplatz, 21:04',lost:'den Residenzplatz',groups:[W_RES,W_HILL,W_FOUNT],water:[-6,-7],bot:0xff9466,fog:0x4b3a6c,speed:1},
- {name:'Festung Hohensalzburg',short:'Festung',intro:'Festung Hohensalzburg, 22:30',lost:'die Festung',groups:[W_FEST],water:null,bot:0x8a4f7a,fog:0x3a3260,speed:1},
- {name:'Mirabellgarten',short:'Mirabell',intro:'Mirabellgarten, 23:45',lost:'den Mirabellgarten',groups:[W_MIRA,W_HILL],water:[0,-14],bot:0x6a3f80,fog:0x2e2a58,speed:1.2}];
-const ALLW=[W_RES,W_HILL,W_FOUNT,W_FEST,W_MIRA],WORLD_AT=[150,300],WIN_AT=500;
+ {name:'Residenzplatz',short:'Residenz',intro:'Salzburg, Residenzplatz, 21:04',lost:'den Residenzplatz',groups:[W_RES,W_HILL,W_FOUNT],water:[-6,-7],bot:0xff9466,fog:0x4b3a6c},
+ {name:'Festung Hohensalzburg',short:'Festung',intro:'Festung Hohensalzburg, 22:30',lost:'die Festung',groups:[W_FEST],water:null,bot:0x8a4f7a,fog:0x3a3260},
+ {name:'Mirabellgarten',short:'Mirabell',intro:'Mirabellgarten, 23:45',lost:'den Mirabellgarten',groups:[W_MIRA,W_HILL],water:[0,-14],bot:0x6a3f80,fog:0x2e2a58},
+ {name:'Weihnachtsmarkt am Residenzplatz',short:'Advent',intro:'Weihnachtsmarkt, Residenzplatz, 18:00',lost:'den Weihnachtsmarkt',groups:[W_RES,W_HILL,W_FOUNT,W_XMAS],water:[-6,-7],bot:0x9aa6d8,fog:0x46507a},
+ {name:'Festung Hohenwerfen',short:'Werfen',intro:'Festung Hohenwerfen, 20:15',lost:'Hohenwerfen',groups:[W_WERF],water:null,bot:0xd98a6a,fog:0x3c4566},
+ {name:'Salzburg Hauptbahnhof',short:'Hbf',intro:'Salzburg Hauptbahnhof, 23:58',lost:'den Hauptbahnhof',groups:[W_HBF],water:null,bot:0x3a3f70,fog:0x22263f},
+ {name:'Getreidegasse',short:'Getreide',intro:'Getreidegasse, 00:15',lost:'die Getreidegasse',groups:[W_GET,W_HILL],water:null,bot:0x5a3a78,fog:0x2a2550}];
+WORLDS.forEach((w,i)=>w.speed=1+.1*i);
+const FINALE={name:'Gaisberg',short:'Gaisberg',groups:[W_GAIS],water:null,bot:0x2a2f66,fog:0x1a1d3a,speed:1};
+const ALLW=[W_RES,W_HILL,W_FOUNT,W_FEST,W_MIRA,W_XMAS,W_WERF,W_HBF,W_GET,W_GAIS],WORLD_AT=[150,300,450,600,750,900],WIN_AT=1000;
 let world=0,SPEED=1;
-function setWorld(n){world=n;const w=WORLDS[n];SPEED=w.speed;ALLW.forEach(g=>g.visible=w.groups.includes(g));
+function setWorld(n){world=n;const w=WORLDS[n]||FINALE;SPEED=w.speed;ALLW.forEach(g=>g.visible=w.groups.includes(g));
  water.visible=!!w.water;if(w.water)water.position.set(w.water[0],0,w.water[1]);
  sky.material.uniforms.bot.value.setHex(w.bot);scene.fog.color.setHex(w.fog).convertSRGBToLinear();document.getElementById('world').textContent=w.short;}
 setWorld(0);
@@ -713,7 +822,7 @@ function makeGoblin(){const g=new THREE.Group();
  const l2=limb(.045,.04,.26,gobSkin);l2.position.set(-.24,.58,0);l2.rotation.z=-.3;g.add(l2);
  g.scale.setScalar(1.15);return {g,arm};}
 function spawn(){for(let i=0;i<3;i++){const o=makeGoblin(),a=rnd()*TAU,r=11+rnd()*2;o.g.position.set(Math.sin(a)*r,0,Math.cos(a)*r);
-  Object.assign(o,{alive:true,ph:rnd()*TAU,speed:(1.2+rnd()*.6)*(1+.1*(level-1))*SPEED});o.g.traverse(c=>c.userData.gob=o);scene.add(o.g);goblins.push(o);}}
+  Object.assign(o,{alive:true,ph:rnd()*TAU,speed:(1.2+rnd()*.6)*SPEED});o.g.traverse(c=>c.userData.gob=o);scene.add(o.g);goblins.push(o);}}
 function poof(pos,col){const parts=[];for(let i=0;i<16;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.07,6,4),B(col,{transparent:true}));
   m.position.copy(pos);m.position.y+=.7;scene.add(m);parts.push([m,new THREE.Vector3(rnd()-.5,rnd()*1.2,rnd()-.5).multiplyScalar(4)]);}bursts.push({parts,t:0});}
 function sfx(k){if(!soundOn)return;const t=ac.currentTime;
@@ -748,7 +857,8 @@ function clickAt(x,y){if(gameOver||paused)return;ndc.set((x-SR.left)/SR.width*2-
  const hit=raycaster.intersectObjects(goblins.filter(o=>o.alive&&!o.targeted).map(o=>o.g),true)[0];throwAt(hit?hit.object.userData.gob:nearest());}
 function restart(){goblins.forEach(o=>o.alive&&scene.remove(o.g));goblins.length=0;hearts=5;score=0;elScore.textContent=0;showHearts();
  gameOver=false;overEl.hidden=true;nextSpawn=(gnow()-t0)/1000+3;resetKerstin((gnow()-t0)/1000);sam.visible=false;SAM.until=-1;SAM.target=null;SAM.nextRandom=(gnow()-t0)/1000+35;robiReset();mcReset();
- BAI.state='home';bob.position.copy(BAI_HOME);setWorld(0);}
+ BAI.state='home';bob.position.copy(BAI_HOME);setWorld(0);
+ winShowAt=0;fws.forEach(f=>f.parts.forEach(([m])=>scene.remove(m)));fws.length=0;}
 function fight(t,dt){
  if(!gameOver&&t>nextSpawn){spawn();nextSpawn+=5/SPEED;}
  const tmp=new THREE.Vector3();
@@ -893,8 +1003,8 @@ rRoot.scale.setScalar(1.1);rRoot.visible=false;scene.add(rRoot);
 const rShown=pose(0,0),RB={state:'off',target:null,until:0,strikeT:0,hit:false,say:'',sayUntil:0},rv=new THREE.Vector3(),rTmp=new THREE.Vector3();
 const R_ENTRY=new THREE.Vector3(9,0,9);
 function rSay(txt,t,d){RB.say=txt;RB.sayUntil=t+d;rBubble.textContent=txt;}
-function levelUp(t){level++;elLevel.textContent=level;const robi=level>=3;
- toast('LEVEL '+level+'! Goblins +10 % schneller · '+(robi?'Sammi und Robi aus Beham helfen!':'Sammi hilft!'),true);
+function levelUp(t){const pts=nextLevelAt-50,robi=pts>=100;
+ toast(pts+' Punkte! '+(robi?'Sammi und Robi aus Beham helfen!':'Sammi hilft!'),true);
  if(soundOn){const a=ac.currentTime;[523,659,784,1047].forEach((f,i)=>tone('square',f,a+i*.1,.18,.08,3500));}
  sammiHunt(t);
  if(!robi)return;
@@ -957,7 +1067,7 @@ function screamSound(){if(!soundOn)return;const a=ac.currentTime,g=ac.createGain
  lfo.start(a);lfo.stop(a+1.65);noise(a,1.2,.12,'bandpass',3000);}
 function mcReset(){MC.state='off';MC.next=100;perk=false;showPerk();MEN.r.visible=CHR.r.visible=false;shock.visible=false;mBubble.hidden=cBubble.hidden=true;shakeAmt=0;}
 function mcFrame(t,b,dt){
- while(!gameOver&&score>=MC.next){MC.next+=world===2?50:100;
+ while(!gameOver&&score>=MC.next){MC.next+=world>=2?50:100;
    if(!perk){perk=true;showPerk();toast('Perk: Menei & Christine warten auf deinen Einsatz! '+(document.body.classList.contains('gb')?'Tippe den Perk-Knopf.':'Taste C.'),true);}}
  shakeAmt*=Math.exp(-dt*3);
  if(MC.state==='off')return;
@@ -985,16 +1095,31 @@ function mcReset0(){MC.state='off';MEN.r.visible=CHR.r.visible=false;mBubble.hid
 
 const kv=new THREE.Vector3();
 function endGame(msg,title='GAME OVER'){gameOver=true;document.getElementById('overTitle').textContent=title;document.getElementById('overMsg').textContent=msg;document.getElementById('overScore').textContent=score;overEl.hidden=false;banner.hidden=true;pushBtn.hidden=true;}
-function enterWorld(n,t){setWorld(n);const w=WORLDS[n];
- goblins.forEach(o=>{if(o.alive){o.alive=false;scene.remove(o.g);poof(o.g.position,0xffffff);}});shots.forEach(s=>scene.remove(s.m));shots.length=0;
+function clearField(t){goblins.forEach(o=>{if(o.alive){o.alive=false;scene.remove(o.g);poof(o.g.position,0xffffff);}});shots.forEach(s=>scene.remove(s.m));shots.length=0;
  if(K.state!=='off'){K.state='off';kRoot.visible=false;banner.hidden=true;pushBtn.hidden=true;K.next=t+18;}
+ flashEl.animate([{opacity:.85,background:'#fff'},{opacity:0,background:'#fff'}],{duration:900});}
+function enterWorld(n,t){setWorld(n);const w=WORLDS[n];clearField(t);level=n+1;elLevel.textContent=level;
  if(n===2)MC.next=Math.floor(score/50)*50+50;
- nextSpawn=t+4;intro.innerHTML='<div>'+w.intro+'<small>Welt '+(n+1)+' von 3 · Level '+level+'</small></div>';intro.style.opacity=1;introUntil=t+3.4;
- flashEl.animate([{opacity:.85,background:'#fff'},{opacity:0,background:'#fff'}],{duration:900});
- toast(n===2?'Mirabellgarten! Ab jetzt ist alles 20 % schneller.':'Neue Welt: '+w.name+'!',true);
+ nextSpawn=t+4;intro.innerHTML='<div>'+w.intro+'<small>Level '+level+' von '+WORLDS.length+'</small></div>';intro.style.opacity=1;introUntil=t+3.4;
+ toast('Level '+level+': '+w.name+' · Goblins +10 % schneller',true);
  if(soundOn){const a=ac.currentTime;[392,523,659,784,1047].forEach((f,i)=>tone('square',f,a+i*.12,.22,.08,3500));}}
-function winGame(){endGame(WIN_AT+' Punkte! Bici hat Salzburg durchgetanzt: Residenzplatz, Festung und Mirabellgarten.','GEWONNEN!');
+function winGame(t){gameOver=true;clearField(t);setWorld(WORLDS.length);
+ intro.innerHTML='<div>Gaisberg, 00:30<small>'+WIN_AT+' Punkte · Siegestanz über Salzburg</small></div>';intro.style.opacity=1;introUntil=t+4;winShowAt=t+7;nextFw=t+.3;
  if(soundOn){const a=ac.currentTime;[523,659,784,1047,1319,1568].forEach((f,i)=>tone('square',f,a+i*.14,.3,.09,4000));}}
+const fwGeo=new THREE.SphereGeometry(.13,6,4);
+function firework(){const c=new THREE.Vector3((rnd()-.5)*36,16+rnd()*12,-12-rnd()*22),mat=B(bulbCols.concat([0xffffff,0x9be35a])[Math.floor(rnd()*6)],{transparent:true,fog:false}),parts=[];
+ for(let i=0;i<40;i++){const m=new THREE.Mesh(fwGeo,mat);m.position.copy(c);scene.add(m);parts.push([m,new THREE.Vector3(rnd()-.5,rnd()-.5,rnd()-.5).normalize().multiplyScalar(5+rnd()*2)]);}
+ fws.push({parts,mat,t:0});if(soundOn){noise(ac.currentTime,.5,.3,'lowpass',500);}}
+function worldFrame(t,dt){
+ if(world===3&&snowPts){const a=snowPts.geometry.attributes.position.array;for(let i=0;i<a.length;i+=3){a[i+1]-=dt*(1.1+(i%7)*.08);a[i]+=Math.sin(t+i)*dt*.3;if(a[i+1]<0)a[i+1]+=20;}snowPts.geometry.attributes.position.needsUpdate=true;}
+ if(world===4)birds.forEach((bd,i)=>{const a=t*(.35+i*.07)+i*2.1,rad=11+i*2;bd.g.position.set(Math.cos(a)*rad,13+i*1.5+Math.sin(t*.7+i),Math.sin(a)*rad-6);bd.g.rotation.y=-a;bd.wings.forEach((w,k)=>w.rotation.z=(k?-1:1)*.35*Math.sin(t*9+i));});
+ if(world===5&&trainG)trainG.position.x=-110+220*((t%26)/26);
+ if(world===WORLDS.length){towerLights.forEach(l=>l.visible=Math.sin(t*3)>0);if(t>nextFw){nextFw=t+.45+rnd()*.5;firework();}}
+ for(let i=fws.length-1;i>=0;i--){const f=fws[i];f.t+=dt;f.parts.forEach(([m,v])=>{m.position.addScaledVector(v,dt);v.y-=2.5*dt;v.multiplyScalar(.985);});f.mat.opacity=Math.max(0,1-f.t/1.8);
+  if(f.t>1.8){f.parts.forEach(([m])=>scene.remove(m));f.mat.dispose();fws.splice(i,1);}}
+ if(winShowAt&&t>winShowAt){winShowAt=0;document.getElementById('overTitle').textContent='GEWONNEN!';
+  document.getElementById('overMsg').textContent=WIN_AT+' Punkte! Bici hat Salzburg durchgetanzt: sieben Level vom Residenzplatz bis zur Getreidegasse.';
+  document.getElementById('overScore').textContent=score;overEl.hidden=false;}}
 const pauseEl=document.getElementById('pauseEl'),pauseBtn=document.getElementById('pauseBtn');
 function togglePause(want=!paused){if(want===paused||(want&&gameOver))return;paused=want;
  if(paused){pauseAt=performance.now();if(ac&&soundOn)ac.suspend();if(window.speechSynthesis)speechSynthesis.cancel();}
@@ -1013,7 +1138,8 @@ function frame(){requestAnimationFrame(frame);
  const target=pose(m,b),a=1-Math.exp(-dt*14);for(const k in target)shown[k]+=(target[k]-shown[k])*a;
  const spinT=m===2?spinBase+2*TAU*sm(0,8,local):Math.round(spin/TAU)*TAU;spin+=(spinT-spin)*(1-Math.exp(-dt*10));
  apply(shown);root.rotation.y=spin;bobFrame(m,b,t,dt);fight(t,dt);kerstinFrame(t,b,dt);sammiFrame(t,dt);robiFrame(t,b,dt);mcFrame(t,b,dt);
- if(!gameOver){if(world<2&&score>=WORLD_AT[world])enterWorld(world+1,t);if(score>=WIN_AT)winGame();}
+ if(!gameOver){if(world<WORLD_AT.length&&score>=WORLD_AT[world])enterWorld(world+1,t);if(score>=WIN_AT)winGame(t);}
+ worldFrame(t,dt);
  if((K.state==='in')!==bPush){bPush=!bPush;padBLabel.textContent=bPush?'Drängen':'Rolle';padB.classList.toggle('alert',bPush);padB.setAttribute('aria-label',bPush?'B: Kerstin zurückdrängen':'B: Baileys rollt');}
  // world pulses on the beat
  ring.scale.setScalar(1+.06*dip);ring.material.opacity=.45+.5*dip;disc.material.opacity=.1+.14*dip;floorGlow.intensity=.6+1.4*dip;
