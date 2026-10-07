@@ -939,8 +939,8 @@ function kerstinFrame(t,b,dt){
  if(showK){kv.set(0,2.45,0).applyMatrix4(kRoot.matrixWorld).project(camera);kBubble.style.left=((kv.x+1)/2*SR.width+SR.left+18)+'px';kBubble.style.top=((1-kv.y)/2*SR.height+SR.top)+'px';}
  if(gnow()<shoveUntil){const ang=Math.atan2(kRoot.position.x,kRoot.position.z);root.rotation.y=ang;
    arms[0].sh.rotation.set(-1.5,0,-.25);arms[1].sh.rotation.set(-1.5,0,.25);arms[0].el.rotation.x=arms[1].el.rotation.x=-.1;spine.rotation.x=.25;}}
-/* ---------- Joker Sammi: black-and-white Shih Tzu, 50 % damage block ---------- */
-const sWhite=M(0xf7f5f0,{map:furTex,roughness:1}),sWhiteD=M(0xf7f5f0,{map:furTex,roughness:1,side:THREE.DoubleSide}),sBlack=M(0x2a2628,{map:furTex,roughness:1}),sBow=M(0xe0303a,{roughness:.5});
+/* ---------- Joker Sammi: black Shih Tzu, 50 % damage block ---------- */
+const sWhite=M(0x2e2a2c,{map:furTex,roughness:.85}),sWhiteD=M(0x2e2a2c,{map:furTex,roughness:.85,side:THREE.DoubleSide}),sBlack=M(0x141213,{map:furTex,roughness:.9}),sBow=M(0xe0303a,{roughness:.5});
 const sam=new THREE.Group();sam.visible=false;scene.add(sam);
 const samBody=new THREE.Group();sam.add(samBody);
 {const sk=new THREE.CylinderGeometry(.13,.21,.21,22,1,true);sk.translate(0,-.105,0);const m=new THREE.Mesh(sk,sWhiteD);m.position.y=.23;m.castShadow=true;samBody.add(m);}

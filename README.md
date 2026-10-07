@@ -31,7 +31,7 @@ Der Button **Klassisch / Game-Boy-Modus** schaltet jederzeit um; die Wahl merkt 
 Pfeiltasten drehen und zoomen die Kamera auch am Desktop.
 
 Moves: Hüftschwung, Klatschen, Pirouette, Disco-Finger, Salzburg-Hüpfer.
-Joker **Sammi**, ein schwarz-weißer Shih Tzu: Würde Bici Schaden nehmen, rennt er herbei und
+Joker **Sammi**, ein schwarzer Shih Tzu: Würde Bici Schaden nehmen, rennt er herbei und
 bellt laut. Mit 50 % Chance verbellt er den Goblin und der Schaden fällt weg, sonst passiert nichts.
 
 **Dev-Modus:** `?dev` an die Adresse hängen (z. B. `…/bici_in_salzburg/?dev`), dann gibt es oben
