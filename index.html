@@ -875,7 +875,8 @@ function baileysFrame(t,dt){
   else{bob.position.addScaledVector(bv,Math.min(1,6*dt/d));bob.position.y=.06*Math.abs(Math.sin(t*18));bob.rotation.y=Math.atan2(bv.x,bv.z);
    front.forEach((l,i)=>l.rotation.x=.6*Math.sin(t*18+i*Math.PI));hind.forEach((l,i)=>l.rotation.x=-.6*Math.sin(t*18+i*Math.PI));}}
  else rollG.rotation.x=0;}
-function nearest(){let best=null,bd=1e9;goblins.forEach(o=>{if(o.alive&&!o.targeted){const d=o.g.position.length();if(d<bd){bd=d;best=o;}}});return best;}
+/* throw target: closest goblin, but a shooting ranged goblin counts as if it stood at 3.5 m */
+function nearest(){let best=null,bd=1e9;goblins.forEach(o=>{if(o.alive&&!o.targeted){let d=o.g.position.length();if(o.ranged)d=Math.min(d,3.5);if(d<bd){bd=d;best=o;}}});return best;}
 let drunkUntil=0,drunkMiss=false;
 function throwAt(o){if(gameOver||paused||!o||!o.alive||o.targeted)return;o.targeted=true;throwUntil=gnow()+320;
  const m=new THREE.Mesh(new THREE.SphereGeometry(.11,16,12),kugelM);m.castShadow=true;scene.add(m);
