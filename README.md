@@ -24,11 +24,10 @@ three.js (r128) kommt vom CDN.
 | M | Sound an/aus |
 | P / Esc / Pause-Button | Pause an/aus (auch automatisch beim Tab-Wechsel) |
 
-**Game-Boy-Modus:** Auf Handys und Tablets startet das Spiel als Handheld: im Hochformat oben der Bildschirm,
-unten Steuerkreuz (Kamera drehen/zoomen), **A** = Mozartkugel werfen, **B** = Baileys rollt bzw. Kerstin zurückdrängen
-(leuchtet, sobald sie kommt), dazu Sound, Move und Pause. Im Querformat liegen die Tasten am Rand über der Szene.
-Der Button **Klassisch / Game-Boy-Modus** schaltet jederzeit um; die Wahl merkt sich der Browser.
-Pfeiltasten drehen und zoomen die Kamera auch am Desktop.
+**Game-Boy-Modus:** Standard ist auf allen Geräten die klassische Ansicht. Über den Button **Game-Boy-Modus**
+lässt sich ein Handheld-Layout einschalten: im Hochformat oben der Bildschirm, unten Steuerkreuz (Kamera),
+**A** = Mozartkugel werfen, **B** = Baileys rollt bzw. zurückdrängen, dazu Sound, Move und Pause.
+Der Button **Klassisch** schaltet zurück; die Wahl merkt sich der Browser.
 
 Moves: Hüftschwung, Klatschen, Pirouette, Disco-Finger, Salzburg-Hüpfer.
 Joker **Sammi**, ein schwarzer Shih Tzu: Würde Bici Schaden nehmen, rennt er herbei und
@@ -66,4 +65,7 @@ Tanzfläche betritt: Kerstin bleibt stehen, die Bühne leert sich nicht weiter, 
 Kerstin heim. Punkte gibt es dafür keine, die 10 Punkte bringt nur selbst Zurückdrängen.
 
 Bici hat fünf Leben; bei null ist Game Over. Ebenso, wenn die Bühnen-Leiste leer ist.
-Goblin = 1 Punkt, Kerstin vertrieben = 10 Punkte; sie kommt jedes Mal hartnäckiger zurück.
+**Der Alei** kommt ab etwa 45 Sekunden mit zwei Bier, torkelt auf die Tanzfläche („Bici, sauf ma oan!“) und
+leert wie Kerstin die Bühnen-Leiste. Zurückdrängen wie bei Kerstin; sind beide da, trifft K den, der näher ist.
+
+Goblin = 1 Punkt, Kerstin oder Alei vertrieben = je 10 Punkte; sie kommt jedes Mal hartnäckiger zurück.
