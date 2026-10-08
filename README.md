@@ -71,7 +71,7 @@ näher ist. Erreicht er Bici, stoßen sie an: Bici ist 5 Sekunden beschwipst, sc
 
 **Fernkampf-Goblins** (jeder fünfte, lila Kapuze, orange Markierung): Sie bleiben in etwa 7 m Abstand stehen,
 schleudern drei Steine (je ½ Leben, Sammi wehrt mit 50 % ab) und laufen dann wie normale Goblins auf Bici zu.
-Nur **Baileys** kann sie besiegen: Ist ein Fernkämpfer auf dem Platz, rollt Baileys mit **R** (oder Antippen des
-Fernkämpfers) immer gezielt auf ihn zu und erwischt ihn sicher. Mozartkugeln, Robi, Sammi und Christine wirken nicht.
+Mozartkugeln prallen an ihnen ab. Ist ein Fernkämpfer auf dem Platz, rollt **Baileys** mit **R** (oder Antippen
+des Fernkämpfers) immer gezielt auf ihn zu und erwischt ihn sicher. Sammi, Robi und Christine erledigen sie ebenfalls.
 
 Goblin = 1 Punkt, Kerstin oder Alei vertrieben = je 10 Punkte; sie kommt jedes Mal hartnäckiger zurück.
