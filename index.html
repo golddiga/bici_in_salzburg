@@ -657,7 +657,7 @@ const WORLDS=[
 WORLDS.forEach((w,i)=>w.speed=1+.1*i);
 const FINALE={name:'Gaisberg',short:'Gaisberg',groups:[W_GAIS],water:null,bot:0x2a2f66,fog:0x1a1d3a,speed:1};
 const ALLW=[W_RES,W_HILL,W_FOUNT,W_FEST,W_MIRA,W_XMAS,W_WERF,W_HBF,W_GET,W_GAIS],WORLD_AT=[150,300,450,600,750,900],WIN_AT=1000;
-let world=0,SPEED=1;
+let world=0,SPEED=1;const BASE_SPEED=1.2; // goblin base speed multiplier (+20 %)
 function setWorld(n){world=n;const w=WORLDS[n]||FINALE;SPEED=w.speed;ALLW.forEach(g=>g.visible=w.groups.includes(g));
  water.visible=!!w.water;if(w.water)water.position.set(w.water[0],0,w.water[1]);
  sky.material.uniforms.bot.value.setHex(w.bot);scene.fog.color.setHex(w.fog).convertSRGBToLinear();document.getElementById('world').textContent=w.short;}
@@ -826,7 +826,7 @@ function makeGoblin(){const g=new THREE.Group();
  const l2=limb(.045,.04,.26,gobSkin);l2.position.set(-.24,.58,0);l2.rotation.z=-.3;g.add(l2);
  g.scale.setScalar(1.15);return {g,arm};}
 function spawn(){for(let i=0;i<3;i++){const o=makeGoblin(),a=rnd()*TAU,r=11+rnd()*2;o.g.position.set(Math.sin(a)*r,0,Math.cos(a)*r);
-  Object.assign(o,{alive:true,ph:rnd()*TAU,speed:(1.2+rnd()*.6)*SPEED});o.g.traverse(c=>c.userData.gob=o);scene.add(o.g);goblins.push(o);}}
+  Object.assign(o,{alive:true,ph:rnd()*TAU,speed:(1.2+rnd()*.6)*BASE_SPEED*SPEED});o.g.traverse(c=>c.userData.gob=o);scene.add(o.g);goblins.push(o);}}
 function poof(pos,col){const parts=[];for(let i=0;i<16;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.07,6,4),B(col,{transparent:true}));
   m.position.copy(pos);m.position.y+=.7;scene.add(m);parts.push([m,new THREE.Vector3(rnd()-.5,rnd()*1.2,rnd()-.5).multiplyScalar(4)]);}bursts.push({parts,t:0});}
 function sfx(k){if(!soundOn)return;const t=ac.currentTime;
