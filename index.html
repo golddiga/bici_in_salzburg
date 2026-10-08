@@ -875,9 +875,11 @@ function baileysFrame(t,dt){
    front.forEach((l,i)=>l.rotation.x=.6*Math.sin(t*18+i*Math.PI));hind.forEach((l,i)=>l.rotation.x=-.6*Math.sin(t*18+i*Math.PI));}}
  else rollG.rotation.x=0;}
 function nearest(){let best=null,bd=1e9;goblins.forEach(o=>{if(o.alive&&!o.targeted&&!o.ranged){const d=o.g.position.length();if(d<bd){bd=d;best=o;}}});return best;}
+let drunkUntil=0,drunkMiss=false;
 function throwAt(o){if(gameOver||paused||!o||!o.alive||o.targeted||o.ranged)return;o.targeted=true;throwUntil=gnow()+320;
  const m=new THREE.Mesh(new THREE.SphereGeometry(.11,16,12),kugelM);m.castShadow=true;scene.add(m);
- shots.push({m,o,t:0,from:new THREE.Vector3(-.4,1.6,.2).applyAxisAngle(UP,root.rotation.y)});sfx('throw');}
+ const miss=(gnow()-t0)/1000<drunkUntil&&(drunkMiss=!drunkMiss);
+ shots.push({m,o,t:0,off:miss?new THREE.Vector3(rnd()<.5?-1.4:1.4,0,.7):null,from:new THREE.Vector3(-.4,1.6,.2).applyAxisAngle(UP,root.rotation.y)});sfx('throw');}
 function clickAt(x,y){if(gameOver||paused)return;ndc.set((x-SR.left)/SR.width*2-1,-((y-SR.top)/SR.height)*2+1);raycaster.setFromCamera(ndc,camera);
  if(K.state==='in'&&raycaster.intersectObject(kRoot,true).length){kPushK();return;}
  if(AL.state==='in'&&raycaster.intersectObject(aRoot,true).length){aPush();return;}
@@ -902,9 +904,9 @@ function fight(t,dt){
   st.m.position.lerpVectors(st.from,STONE_TO,Math.min(1,st.t));st.m.position.y+=1.2*Math.sin(Math.PI*Math.min(1,st.t));st.m.rotation.x+=dt*12;
   if(st.t>=1){scene.remove(st.m);stones.splice(i,1);if(!gameOver)rangedHit(t);}}
  for(let i=goblins.length-1;i>=0;i--)if(!goblins[i].alive)goblins.splice(i,1);
- for(let i=shots.length-1;i>=0;i--){const s=shots[i];s.t+=dt/.42;tmp.copy(s.o.g.position);tmp.y+=.75;
+ for(let i=shots.length-1;i>=0;i--){const s=shots[i];s.t+=dt/.42;tmp.copy(s.o.g.position);tmp.y+=.75;if(s.off)tmp.add(s.off);
   s.m.position.lerpVectors(s.from,tmp,Math.min(1,s.t));s.m.position.y+=1.1*Math.sin(Math.PI*Math.min(1,s.t));s.m.rotation.x+=dt*14;
-  if(s.t>=1){scene.remove(s.m);shots.splice(i,1);kill(s.o,true);}}
+  if(s.t>=1){scene.remove(s.m);shots.splice(i,1);if(s.off){s.o.targeted=false;poof(s.m.position,0x9a9a9a);biciSay('Hicks … daneben!',t,1.2);}else kill(s.o,true);}}
  for(let i=bursts.length-1;i>=0;i--){const b=bursts[i];b.t+=dt;b.parts.forEach(([m,v])=>{m.position.addScaledVector(v,dt);v.y-=9*dt;m.material.opacity=Math.max(0,1-b.t/.7);});
   if(b.t>.7){b.parts.forEach(([m])=>{scene.remove(m);m.geometry.dispose();m.material.dispose();});bursts.splice(i,1);}}
  if(gnow()<throwUntil){arms[1].sh.rotation.set(-2.3,0,-.25);arms[1].el.rotation.x=-.15;}}
@@ -982,7 +984,7 @@ aRoot.scale.set(1.04,1.14,1.04);
   const gl=new THREE.Mesh(new THREE.CylinderGeometry(.075,.065,.22,16),M(0xe8a317,{transparent:true,opacity:.88,roughness:.15,emissive:0x5a3a00,emissiveIntensity:.35}));g.add(gl);
   const fo=new THREE.Mesh(new THREE.CylinderGeometry(.079,.079,.05,16),M(0xfffbf0,{roughness:.9}));fo.position.y=.12;g.add(fo);
   const hd=new THREE.Mesh(new THREE.TorusGeometry(.05,.012,8,16),M(0xd9d4c4,{transparent:true,opacity:.7}));hd.position.x=.1;hd.rotation.y=Math.PI/2;g.add(hd);});}
-const AL={state:'off',r:10,a:0,vel:0,next:45,level:0,sayUntil:0,staggerUntil:0,nextLine:0},aBubble=document.getElementById('abubble'),aShown=pose(0,0);
+const AL={state:'off',r:10,a:0,vel:0,next:25,level:0,sayUntil:0,staggerUntil:0,nextLine:0,t:0},aBubble=document.getElementById('abubble'),aShown=pose(0,0);
 const AL_LINES=['Bici, sauf ma oan!','Prost, Bici!','Oa Hoibe geht no!','Hicks! … Bici, i zoi!','Oans, zwoa, gsuffa!','Geh Bici, oa Bier no!'];
 function aSay(txt,t,d){AL.sayUntil=t+d;aBubble.textContent=txt;}
 function aArrive(t){Object.assign(AL,{state:'in',r:10.5,a:(rnd()-.5)*2.2,vel:0,nextLine:t+3});aRoot.visible=true;aSay(AL_LINES[AL.level%2],t,2.6);
@@ -991,7 +993,7 @@ function aArrive(t){Object.assign(AL,{state:'in',r:10.5,a:(rnd()-.5)*2.2,vel:0,n
 function aPush(){if(gameOver||paused||AL.state!=='in')return;const t=(gnow()-t0)/1000;AL.vel+=5.5;AL.staggerUntil=t+.5;shoveUntil=gnow()+280;shoveAt=aRoot;
  if(rnd()<.45)aSay(['Hoppala!','Hey, mei Bier!','Hicks!','Ned so grob!'][Math.floor(rnd()*4)],t,1.1);
  if(soundOn){const a=ac.currentTime;tone('sine',85,a,.22,.55);noise(a,.08,.2,'lowpass',900);}}
-function resetAlei(t){Object.assign(AL,{state:'off',next:t+45,level:0,sayUntil:0});aRoot.visible=false;aBubble.hidden=true;}
+function resetAlei(t){drunkUntil=0;Object.assign(AL,{state:'off',next:t+25,level:0,sayUntil:0});aRoot.visible=false;aBubble.hidden=true;}
 function aleiFrame(t,b,dt){
  if(!gameOver&&AL.state==='off'&&t>AL.next)aArrive(t);
  if(AL.state==='off'){aBubble.hidden=true;return;}
@@ -1000,18 +1002,23 @@ function aleiFrame(t,b,dt){
   if(AL.state==='in'&&!stag&&AL.r>1.1)AL.r=Math.max(1.1,AL.r-(.7+.12*AL.level)*SPEED*dt);
   if(AL.state==='leaving')AL.r+=1.8*dt;}
  if(AL.state==='in'&&AL.r>10.5){AL.state='leaving';score+=10;elScore.textContent=score;aSay('Na guad … dann trink i’s söba.',t,2.4);}
- if(AL.state==='leaving'&&AL.r>17){AL.state='off';aRoot.visible=false;AL.level++;AL.next=t+35;aBubble.hidden=true;return;}
+ if(AL.state==='leaving'&&AL.r>17){AL.state='off';aRoot.visible=false;AL.level++;AL.next=t+12+rnd()*6;aBubble.hidden=true;return;}
+ if(AL.state==='in'&&AL.r<=1.7){AL.state='cheers';AL.t=t;aSay('Prost, Bici! Ex!',t,1.6);}
+ if(AL.state==='cheers'&&t-AL.t>1.4){makeDrunk(t);AL.state='leaving';aSay('Pfiat di, Bici! Hicks!',t,2);}
  if(AL.state==='in'&&t>AL.nextLine&&t>AL.sayUntil){AL.nextLine=t+3+rnd()*2;aSay(AL_LINES[Math.floor(rnd()*AL_LINES.length)],t,1.8);}
  aRoot.position.set(Math.sin(AL.a)*AL.r,0,Math.cos(AL.a)*AL.r);
  if(AL.state==='leaving')aRoot.lookAt(aRoot.position.x*2,0,aRoot.position.z*2);else aRoot.lookAt(0,0,0);
  const sw=Math.sin(t*1.6),T=Object.assign(pose(0,0),{hx:.08*sw,hrz:.12*sw,sz:-.16*sw,hdz:.22*Math.sin(t*1.3),hdx:.08,
   lSx:-1.05+.15*Math.sin(t*2),rSx:-1.35+.2*Math.sin(t*2.4+1),lSz:.25,rSz:-.25,lE:-1.1,rE:-1.25,kL:.18+.12*Math.max(0,sw),kR:.18+.12*Math.max(0,-sw),tz:0});
  if(stag)Object.assign(T,{sx:-.5,hdx:-.35,lSx:-.4,rSx:-.4,lSz:1.4,rSz:-1.4,kL:.3,kR:.05});
+ if(AL.state==='cheers')Object.assign(T,{lSx:-2.5,rSx:-2.5,lSz:.15,rSz:-.15,lE:-.3,rE:-.3,hdx:-.2});
  const k=1-Math.exp(-dt*10);for(const q in T)aShown[q]+=(T[q]-aShown[q])*k;apply(aShown,ALR);
  if(AL.state==='in'&&AL.r<2.4&&!gameOver){stageMeter=Math.max(0,stageMeter-dt*.12*(1+.25*AL.level));
   if(stageMeter<=0)endGame('Der Alei hat die Tanzfläche in eine Bierbude verwandelt.');}
  const show=t<AL.sayUntil;aBubble.hidden=!show;
  if(show){kv.set(0,2.6,0).applyMatrix4(aRoot.matrixWorld).project(camera);aBubble.style.left=((kv.x+1)/2*SR.width+SR.left+18)+'px';aBubble.style.top=((1-kv.y)/2*SR.height+SR.top)+'px';}}
+function makeDrunk(t){drunkUntil=t+5;drunkMiss=true;biciSay('Prost … hicks!',t,1.6);toast('Bici ist beschwipst! 5 Sekunden wackelig, nur jeder 2. Wurf trifft.',false);
+ if(soundOn){const a=ac.currentTime;[0,.5,1.1].forEach(d=>tone('sine',330+d*60,a+d,.12,.12));}}
 function rivalsUI(){const kIn=K.state==='in',aIn=AL.state==='in',any=(kIn||aIn)&&!gameOver;banner.hidden=!any;pushBtn.hidden=!any;if(!any)return;
  const who=kIn&&aIn?'Kerstin und der Alei wollen die Tanzfläche!':aIn?'Der Alei will mit Bici saufen!':'Kerstin will die Tanzfläche!',obj=kIn&&aIn?'beide':aIn?'ihn':'sie';
  const bw=document.getElementById('bWho');if(bw.textContent!==who){bw.textContent=who;banner.querySelectorAll('.bObj').forEach(e=>e.textContent=obj);}}
@@ -1215,7 +1222,7 @@ const kv=new THREE.Vector3();
 function endGame(msg,title='GAME OVER'){gameOver=true;document.getElementById('overTitle').textContent=title;document.getElementById('overMsg').textContent=msg;document.getElementById('overScore').textContent=score;overEl.hidden=false;banner.hidden=true;pushBtn.hidden=true;}
 function clearField(t){goblins.forEach(o=>{if(o.alive){o.alive=false;scene.remove(o.g);poof(o.g.position,0xffffff);}});shots.forEach(s=>scene.remove(s.m));shots.length=0;stones.forEach(s=>scene.remove(s.m));stones.length=0;
  if(K.state!=='off'){K.state='off';kRoot.visible=false;banner.hidden=true;pushBtn.hidden=true;K.next=t+18;}
- if(AL.state!=='off'){AL.state='off';aRoot.visible=false;aBubble.hidden=true;AL.next=t+28;}
+ if(AL.state!=='off'){AL.state='off';aRoot.visible=false;aBubble.hidden=true;AL.next=t+15;}
  flashEl.animate([{opacity:.85,background:'#fff'},{opacity:0,background:'#fff'}],{duration:900});}
 function enterWorld(n,t){setWorld(n);const w=WORLDS[n];clearField(t);level=n+1;elLevel.textContent=level;
  if(n===2)MC.next=Math.floor(score/50)*50+50;
@@ -1257,7 +1264,10 @@ function frame(){requestAnimationFrame(frame);
  if(m!==lastMove){lastMove=m;spinBase=Math.round(spin/TAU)*TAU;elName.textContent=MOVES[m][0];elText.textContent=MOVES[m][1];}
  const target=pose(m,b),a=1-Math.exp(-dt*14);for(const k in target)shown[k]+=(target[k]-shown[k])*a;
  const spinT=m===2?spinBase+2*TAU*sm(0,8,local):Math.round(spin/TAU)*TAU;spin+=(spinT-spin)*(1-Math.exp(-dt*10));
- apply(shown);root.rotation.y=spin;bobFrame(m,b,t,dt);fight(t,dt);kerstinFrame(t,b,dt);aleiFrame(t,b,dt);rivalsUI();sammiFrame(t,dt);robiFrame(t,b,dt);mcFrame(t,b,dt);mamaFrame(t,dt);
+ apply(shown);root.rotation.y=spin;
+ if(t<drunkUntil){const k=Math.min(1,(drunkUntil-t)/.6);root.rotation.z=.16*Math.sin(t*3.1)*k;root.rotation.x=.08*Math.sin(t*2.3)*k;root.position.x=.18*Math.sin(t*1.7)*k;}
+ else if(root.rotation.z||root.position.x){root.rotation.z=root.rotation.x=0;root.position.x=0;}
+bobFrame(m,b,t,dt);fight(t,dt);kerstinFrame(t,b,dt);aleiFrame(t,b,dt);rivalsUI();sammiFrame(t,dt);robiFrame(t,b,dt);mcFrame(t,b,dt);mamaFrame(t,dt);
  if(!gameOver){if(world<WORLD_AT.length&&score>=WORLD_AT[world])enterWorld(world+1,t);if(score>=WIN_AT)winGame(t);}
  worldFrame(t,dt);
  if(rivalIn()!==bPush){bPush=!bPush;padBLabel.textContent=bPush?'Drängen':'Rolle';padB.classList.toggle('alert',bPush);padB.setAttribute('aria-label',bPush?'B: zurückdrängen':'B: Baileys rollt');}
@@ -1271,7 +1281,7 @@ function frame(){requestAnimationFrame(frame);
  const yaw=(reduced?.35:.65*Math.sin(t*.11))+yawU,r=6.4+(reduced?0:1.1*Math.sin(t*.07))+zoomU,h=1.8+(reduced?0:.5*Math.sin(t*.09))+pitchU;
  const ox=Math.sin(yaw)*r,oz=Math.cos(yaw)*r,e=reduced?1:sm(0,7,t);
  camera.position.set(ox*e,h*e+14*(1-e),oz*e+30*(1-e));
- look.set(0,1.25*e+11*(1-e),-62*(1-e));camera.lookAt(look);
+ look.set(0,1.25*e+11*(1-e),-62*(1-e));camera.lookAt(look);if(t<drunkUntil)camera.rotateZ(.05*Math.sin(t*2.2));
  if(shakeAmt>.002){camera.position.x+=(Math.random()-.5)*shakeAmt;camera.position.y+=(Math.random()-.5)*shakeAmt;}
  if(introUntil&&t>introUntil){intro.style.opacity=0;introUntil=0;}
  elBeat.textContent=Math.floor(b);elCombo.textContent='×'+(1+Math.floor(local))*(m===2?2:1);

@@ -65,8 +65,9 @@ Tanzfläche betritt: Kerstin bleibt stehen, die Bühne leert sich nicht weiter, 
 Kerstin heim. Punkte gibt es dafür keine, die 10 Punkte bringt nur selbst Zurückdrängen.
 
 Bici hat fünf Leben; bei null ist Game Over. Ebenso, wenn die Bühnen-Leiste leer ist.
-**Der Alei** kommt ab etwa 45 Sekunden mit zwei Bier, torkelt auf die Tanzfläche („Bici, sauf ma oan!“) und
-leert wie Kerstin die Bühnen-Leiste. Zurückdrängen wie bei Kerstin; sind beide da, trifft K den, der näher ist.
+**Der Alei** kommt oft (erstmals nach etwa 25 Sekunden, dann alle 12 bis 18 Sekunden) mit zwei Bier und torkelt
+auf Bici zu („Bici, sauf ma oan!“). Zurückdrängen wie bei Kerstin gibt 10 Punkte; sind beide da, trifft K den, der
+näher ist. Erreicht er Bici, stoßen sie an: Bici ist 5 Sekunden beschwipst, schwankt, und nur jeder 2. Wurf trifft.
 
 **Fernkampf-Goblins** (jeder fünfte, lila Kapuze, orange Markierung): Sie bleiben in etwa 7 m Abstand stehen,
 schleudern drei Steine (je ½ Leben, Sammi wehrt mit 50 % ab) und laufen dann wie normale Goblins auf Bici zu.
