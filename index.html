@@ -91,6 +91,7 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
 .bubble.mama::after{border-top-color:#fff3c4}
 @keyframes shake{to{margin-left:4px;margin-top:-3px}}
 .hearts{color:var(--rose)!important;letter-spacing:.05em}
+.hearts .half{background:linear-gradient(90deg,var(--rose) 50%,rgba(247,240,227,.3) 50%);-webkit-background-clip:text;background-clip:text;color:transparent!important}
 .flash{position:fixed;inset:0;pointer-events:none;background:#ff2848;opacity:0}
 .over{position:fixed;inset:0;display:grid;place-items:center;padding-inline:16px;background:rgba(10,8,24,.55);z-index:5}
 .over .card{text-align:center;background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:16px;padding:24px 28px;max-width:420px}
@@ -282,7 +283,7 @@ body.gb #fmtBtn{position:fixed;z-index:6;top:calc(18px + env(safe-area-inset-top
         <button id="throwBtn" type="button">Mozartkugel werfen</button>
         <button class="push" id="pushBtn" type="button" hidden>Zurückdrängen</button>
       </div>
-      <div class="hint">Goblins antippen oder F · Kerstin antippen oder K · R = Baileys rollt · Leertaste = Move · C = Perk · M = Sound · P = Pause</div>
+      <div class="hint">Goblins antippen oder F · Kerstin antippen oder K · R = Baileys rollt (gegen Fernkämpfer) · Leertaste = Move · C = Perk · M = Sound · P = Pause</div>
     </div>
   </div>
 </div>
@@ -812,25 +813,41 @@ let paused=false,pauseAt=0,pausedMs=0;const gnow=()=>(paused?pauseAt:performance
 const t0=gnow();const beatNow=()=>(gnow()-t0)/1000*BPM/60;
 /* ---------- goblins: three every five seconds ---------- */
 const gobSkin=M(0x6f9a3a,{roughness:.7,emissive:0x1b2a0a,emissiveIntensity:.6}),gobTunic=M(0x5a3d26,{roughness:.9}),gobEye=B(0xffd23a),clubM=M(0x4a3020,{roughness:.9});
+const rangedTunic=M(0x3b2a5c,{roughness:.8}),rangedEye=B(0xff4040),stoneM=M(0x6e6a64,{roughness:.9});const stones=[];let seenRanged=false;
 const kugelM=M(0x9fb6d6,{metalness:.85,roughness:.25,emissive:0x2a3a60,emissiveIntensity:.5});
 const goblins=[],shots=[],bursts=[];let hearts=5,score=0,nextSpawn=7,gameOver=false,throwUntil=0;
 const raycaster=new THREE.Raycaster(),ndc=new THREE.Vector2(),UP=new THREE.Vector3(0,1,0);
 const elScore=document.getElementById('score'),elHearts=document.getElementById('hearts'),overEl=document.getElementById('over'),flashEl=document.getElementById('flash');
-function showHearts(){elHearts.textContent='♥'.repeat(hearts)+'♡'.repeat(5-hearts);}
-function makeGoblin(){const g=new THREE.Group();
+function showHearts(){const h=Math.max(0,Math.min(5,hearts)),full=Math.floor(h),half=h-full>=.5?1:0;
+ elHearts.innerHTML='♥'.repeat(full)+(half?'<span class="half">♥</span>':'')+'♡'.repeat(5-full-half);}
+function makeGoblin(ranged){const g=new THREE.Group();const tunic=ranged?rangedTunic:gobTunic;
  const sph=r=>new THREE.SphereGeometry(r,16,12);
  const part=(geo,mat,x,y,z,par=g)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=true;par.add(m);return m;};
- part(sph(.22),gobTunic,0,.45,0).scale.set(1,1.1,.9);
+ part(sph(.22),tunic,0,.45,0).scale.set(1,1.1,.9);
  [1,-1].forEach(s=>{const l=limb(.06,.05,.3,gobSkin);l.position.set(.1*s,.32,0);g.add(l);part(sph(.06),gobSkin,.1*s,.03,.04).scale.set(1,.6,1.5);});
  part(sph(.2),gobSkin,0,.82,0).scale.set(1.1,.95,1);
- [1,-1].forEach(s=>{part(new THREE.ConeGeometry(.07,.34,8),gobSkin,.27*s,.88,-.02).rotation.z=-s*1.25;part(sph(.035),gobEye,.075*s,.87,.17);});
+ [1,-1].forEach(s=>{part(new THREE.ConeGeometry(.07,.34,8),gobSkin,.27*s,.88,-.02).rotation.z=-s*1.25;part(sph(.035),ranged?rangedEye:gobEye,.075*s,.87,.17);});
  part(sph(.055),gobSkin,0,.8,.21).scale.set(1,1,1.7);
  const arm=new THREE.Group();arm.position.set(.24,.58,0);g.add(arm);arm.add(limb(.045,.04,.26,gobSkin));
- part(new THREE.CylinderGeometry(.08,.04,.5,8),clubM,0,-.24,.16,arm).rotation.x=1.2;
+ let mark=null;
+ if(ranged){const sl=new THREE.Group();sl.position.set(0,-.3,.05);arm.add(sl);
+  part(new THREE.CylinderGeometry(.022,.022,.18,6),clubM,0,0,0,sl);[1,-1].forEach(q=>{part(new THREE.CylinderGeometry(.016,.016,.14,6),clubM,.045*q,.14,0,sl).rotation.z=-.35*q;});
+  part(new THREE.ConeGeometry(.25,.38,10),tunic,0,1.02,-.02).rotation.x=-.15;
+  mark=new THREE.Mesh(new THREE.OctahedronGeometry(.11),B(0xff9a2e));mark.position.y=1.45;g.add(mark);}
+ else part(new THREE.CylinderGeometry(.08,.04,.5,8),clubM,0,-.24,.16,arm).rotation.x=1.2;
  const l2=limb(.045,.04,.26,gobSkin);l2.position.set(-.24,.58,0);l2.rotation.z=-.3;g.add(l2);
- g.scale.setScalar(1.15);return {g,arm};}
-function spawn(){for(let i=0;i<3;i++){const o=makeGoblin(),a=rnd()*TAU,r=11+rnd()*2;o.g.position.set(Math.sin(a)*r,0,Math.cos(a)*r);
-  Object.assign(o,{alive:true,ph:rnd()*TAU,speed:(1.2+rnd()*.6)*BASE_SPEED*SPEED});o.g.traverse(c=>c.userData.gob=o);scene.add(o.g);goblins.push(o);}}
+ g.scale.setScalar(1.15);return {g,arm,mark};}
+function spawn(){for(let i=0;i<3;i++){const rg=rnd()<.2,o=makeGoblin(rg),a=rnd()*TAU,r=11+rnd()*2;o.g.position.set(Math.sin(a)*r,0,Math.cos(a)*r);
+  if(rg&&!seenRanged){seenRanged=true;toast('Fernkampf-Goblin! Nur Baileys’ Rolle (R) erwischt ihn.',false);}
+  Object.assign(o,{ranged:rg,shotsLeft:3,nextShot:0,armT:-9,alive:true,ph:rnd()*TAU,speed:(1.2+rnd()*.6)*BASE_SPEED*SPEED});o.g.traverse(c=>c.userData.gob=o);scene.add(o.g);goblins.push(o);}}
+const STONE_TO=new THREE.Vector3(0,1.3,0);
+function shootStone(o){const m=new THREE.Mesh(new THREE.SphereGeometry(.09,8,6),stoneM);m.castShadow=true;const from=o.g.position.clone();from.y+=.95;m.position.copy(from);scene.add(m);
+ stones.push({m,from,t:0});if(soundOn){const a=ac.currentTime;noise(a,.12,.22,'bandpass',900);tone('triangle',420,a,.08,.06);}}
+function rangedHit(t){const blocked=Math.random()<.5;sammiCall(t);
+ if(blocked){toast('Sammi bellt den Stein weg – kein Schaden!',true);return;}
+ hearts-=.5;showHearts();sfx('hit');flashEl.animate([{opacity:.3},{opacity:0}],{duration:350});toast('Steinschleuder-Treffer! −½ Leben',false);
+ if(hearts<=0)endGame('Die Fernkampf-Goblins haben Bici erwischt.');}
+function nearestRanged(){let best=null,bd=1e9;goblins.forEach(o=>{if(o.alive&&o.ranged){const d=o.g.position.length();if(d<bd){bd=d;best=o;}}});return best;}
 function poof(pos,col){const parts=[];for(let i=0;i<16;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.07,6,4),B(col,{transparent:true}));
   m.position.copy(pos);m.position.y+=.7;scene.add(m);parts.push([m,new THREE.Vector3(rnd()-.5,rnd()*1.2,rnd()-.5).multiplyScalar(4)]);}bursts.push({parts,t:0});}
 function sfx(k){if(!soundOn)return;const t=ac.currentTime;
@@ -841,12 +858,13 @@ function kill(o,byPlayer,col){if(!o.alive)return;o.alive=false;scene.remove(o.g)
  if(byPlayer){score++;elScore.textContent=score;sfx('poof');}}
 const BAI={state:'home',dir:new THREE.Vector3(),kills:0},BAI_HOME=new THREE.Vector3(1.4,0,.6),bv=new THREE.Vector3();
 function bobRolle(){if(paused||gameOver)return;const t=(gnow()-t0)/1000;if(BAI.state!=='home'||t-rollT<=1.1)return;
- const g=nearest()||goblins.find(o=>o.alive);
- if(g&&rnd()<.4){BAI.state='out';BAI.kills=0;BAI.dir.set(g.g.position.x-bob.position.x,0,g.g.position.z-bob.position.z).normalize();
+ const rg=nearestRanged(),g=rg||nearest()||goblins.find(o=>o.alive);
+ if(g&&(rg||rnd()<.4)){BAI.state='out';BAI.kills=0;BAI.target=rg;BAI.dir.set(g.g.position.x-bob.position.x,0,g.g.position.z-bob.position.z).normalize();
   if(soundOn){const a=ac.currentTime;[0,.12,.24].forEach(d=>tone('sawtooth',620-d*500,a+d,.1,.1,1600));}}
  else{rollT=t;if(soundOn){const a=ac.currentTime;tone('sawtooth',560,a,.08,.1,1400);}}}
 function baileysFrame(t,dt){
- if(BAI.state==='out'){bob.position.addScaledVector(BAI.dir,10*dt);bob.position.y=.05;bob.rotation.y=Math.atan2(BAI.dir.x,BAI.dir.z);
+ if(BAI.state==='out'){if(BAI.target&&BAI.target.alive)BAI.dir.set(BAI.target.g.position.x-bob.position.x,0,BAI.target.g.position.z-bob.position.z).normalize();
+  bob.position.addScaledVector(BAI.dir,10*dt);bob.position.y=.05;bob.rotation.y=Math.atan2(BAI.dir.x,BAI.dir.z);
   rollG.rotation.set(rollG.rotation.x+dt*16,0,0);rollG.position.y=.3;hind.forEach(l=>l.rotation.x=1.1);front.forEach(l=>l.rotation.x=-1.1);
   goblins.forEach(o=>{if(o.alive&&Math.hypot(o.g.position.x-bob.position.x,o.g.position.z-bob.position.z)<1.2){kill(o,true,0xffe0a0);BAI.kills++;}});
   if(Math.hypot(bob.position.x,bob.position.z)>15){BAI.state='back';
@@ -856,16 +874,17 @@ function baileysFrame(t,dt){
   else{bob.position.addScaledVector(bv,Math.min(1,6*dt/d));bob.position.y=.06*Math.abs(Math.sin(t*18));bob.rotation.y=Math.atan2(bv.x,bv.z);
    front.forEach((l,i)=>l.rotation.x=.6*Math.sin(t*18+i*Math.PI));hind.forEach((l,i)=>l.rotation.x=-.6*Math.sin(t*18+i*Math.PI));}}
  else rollG.rotation.x=0;}
-function nearest(){let best=null,bd=1e9;goblins.forEach(o=>{if(o.alive&&!o.targeted){const d=o.g.position.length();if(d<bd){bd=d;best=o;}}});return best;}
-function throwAt(o){if(gameOver||paused||!o||!o.alive||o.targeted)return;o.targeted=true;throwUntil=gnow()+320;
+function nearest(){let best=null,bd=1e9;goblins.forEach(o=>{if(o.alive&&!o.targeted&&!o.ranged){const d=o.g.position.length();if(d<bd){bd=d;best=o;}}});return best;}
+function throwAt(o){if(gameOver||paused||!o||!o.alive||o.targeted||o.ranged)return;o.targeted=true;throwUntil=gnow()+320;
  const m=new THREE.Mesh(new THREE.SphereGeometry(.11,16,12),kugelM);m.castShadow=true;scene.add(m);
  shots.push({m,o,t:0,from:new THREE.Vector3(-.4,1.6,.2).applyAxisAngle(UP,root.rotation.y)});sfx('throw');}
 function clickAt(x,y){if(gameOver||paused)return;ndc.set((x-SR.left)/SR.width*2-1,-((y-SR.top)/SR.height)*2+1);raycaster.setFromCamera(ndc,camera);
  if(K.state==='in'&&raycaster.intersectObject(kRoot,true).length){kPushK();return;}
  if(AL.state==='in'&&raycaster.intersectObject(aRoot,true).length){aPush();return;}
- const hit=raycaster.intersectObjects(goblins.filter(o=>o.alive&&!o.targeted).map(o=>o.g),true)[0];throwAt(hit?hit.object.userData.gob:nearest());}
+ if(raycaster.intersectObjects(goblins.filter(o=>o.alive&&o.ranged).map(o=>o.g),true).length){bobRolle();return;}
+ const hit=raycaster.intersectObjects(goblins.filter(o=>o.alive&&!o.targeted&&!o.ranged).map(o=>o.g),true)[0];throwAt(hit?hit.object.userData.gob:nearest());}
 function restart(){goblins.forEach(o=>o.alive&&scene.remove(o.g));goblins.length=0;hearts=5;score=0;elScore.textContent=0;showHearts();
- gameOver=false;overEl.hidden=true;nextSpawn=(gnow()-t0)/1000+3;resetKerstin((gnow()-t0)/1000);resetAlei((gnow()-t0)/1000);sam.visible=false;SAM.until=-1;SAM.target=null;SAM.nextRandom=(gnow()-t0)/1000+35;robiReset();mcReset();
+ gameOver=false;overEl.hidden=true;nextSpawn=(gnow()-t0)/1000+3;resetKerstin((gnow()-t0)/1000);resetAlei((gnow()-t0)/1000);stones.forEach(s=>scene.remove(s.m));stones.length=0;seenRanged=false;sam.visible=false;SAM.until=-1;SAM.target=null;SAM.nextRandom=(gnow()-t0)/1000+35;robiReset();mcReset();
  BAI.state='home';bob.position.copy(BAI_HOME);setWorld(0);mamaReset();
  winShowAt=0;fws.forEach(f=>f.parts.forEach(([m])=>scene.remove(m)));fws.length=0;}
 function fight(t,dt){
@@ -873,9 +892,15 @@ function fight(t,dt){
  const tmp=new THREE.Vector3();
  goblins.forEach(o=>{if(!o.alive)return;const p=o.g.position,d=Math.hypot(p.x,p.z);
   if(d<1.3){damage(o,t);return;}
-  if(!gameOver){p.x-=p.x/d*o.speed*dt;p.z-=p.z/d*o.speed*dt;}
-  p.y=.07*Math.abs(Math.sin(t*10+o.ph));o.g.lookAt(0,p.y,0);o.g.rotateZ(.12*Math.sin(t*10+o.ph));
-  o.arm.rotation.x=d<3.5?-1.4+.9*Math.sin(t*9+o.ph):-.3+.3*Math.sin(t*10+o.ph);});
+  const holding=o.ranged&&o.shotsLeft>0&&d<=7.2;
+  if(!gameOver&&!holding){p.x-=p.x/d*o.speed*dt;p.z-=p.z/d*o.speed*dt;}
+  if(holding&&!gameOver){if(!o.nextShot)o.nextShot=t+1;if(t>o.nextShot){o.shotsLeft--;o.nextShot=t+2.6/SPEED;o.armT=t;shootStone(o);}}
+  p.y=holding?0:.07*Math.abs(Math.sin(t*10+o.ph));o.g.lookAt(0,p.y,0);if(!holding)o.g.rotateZ(.12*Math.sin(t*10+o.ph));
+  if(o.mark){o.mark.rotation.y+=dt*3;o.mark.scale.setScalar(1+.25*Math.sin(t*6));}
+  o.arm.rotation.x=holding?(t-o.armT<.25?-2.4:-1.2):d<3.5?-1.4+.9*Math.sin(t*9+o.ph):-.3+.3*Math.sin(t*10+o.ph);});
+ for(let i=stones.length-1;i>=0;i--){const st=stones[i];st.t+=dt/.9;
+  st.m.position.lerpVectors(st.from,STONE_TO,Math.min(1,st.t));st.m.position.y+=1.2*Math.sin(Math.PI*Math.min(1,st.t));st.m.rotation.x+=dt*12;
+  if(st.t>=1){scene.remove(st.m);stones.splice(i,1);if(!gameOver)rangedHit(t);}}
  for(let i=goblins.length-1;i>=0;i--)if(!goblins[i].alive)goblins.splice(i,1);
  for(let i=shots.length-1;i>=0;i--){const s=shots[i];s.t+=dt/.42;tmp.copy(s.o.g.position);tmp.y+=.75;
   s.m.position.lerpVectors(s.from,tmp,Math.min(1,s.t));s.m.position.y+=1.1*Math.sin(Math.PI*Math.min(1,s.t));s.m.rotation.x+=dt*14;
@@ -1015,7 +1040,7 @@ function barkSound(when){const t=ac.currentTime+when,o=ac.createOscillator(),f=a
  g.gain.setValueAtTime(.7,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);o.connect(f);f.connect(g);g.connect(master);o.start(t);o.stop(t+.18);noise(t,.09,.35,'bandpass',1600);}
 function sammiCall(t){if(!sam.visible){sam.visible=true;sam.position.copy(SAM.exit);biciSay('Sammy, bei Fuß!',t,1.8);}
  SAM.until=t+4;SAM.barks=[t+.45,t+.75,t+1.05];if(soundOn)[.45,.75,1.05].forEach(barkSound);}
-function sammiHunt(t){const g=nearest()||goblins.find(o=>o.alive);if(!sam.visible){sam.visible=true;sam.position.copy(SAM.exit);biciSay('Sammy, bei Fuß!',t,1.8);}
+function sammiHunt(t){const g=nearest()||goblins.find(o=>o.alive&&!o.ranged);if(!sam.visible){sam.visible=true;sam.position.copy(SAM.exit);biciSay('Sammy, bei Fuß!',t,1.8);}
  SAM.target=g||null;if(g)g.targeted=true;SAM.until=t+(g?8:3);
  if(!g){SAM.barks=[t+.45,t+.75,t+1.05];if(soundOn)[.45,.75,1.05].forEach(barkSound);}}
 function damage(o,t){const blocked=Math.random()<.5;sammiCall(t);
@@ -1025,7 +1050,7 @@ function damage(o,t){const blocked=Math.random()<.5;sammiCall(t);
  if(hearts<=0)endGame('Die Goblins haben '+WORLDS[world].lost+' erobert.');}
 const sv=new THREE.Vector3();
 function sammiFrame(t,dt){
- if(!gameOver&&t>SAM.nextRandom){SAM.nextRandom=t+25+rnd()*35;if(!SAM.target&&goblins.some(o=>o.alive&&!o.targeted)){sammiHunt(t);toast('Sammi hat Lust auf Goblin-Jagd!',true);}}
+ if(!gameOver&&t>SAM.nextRandom){SAM.nextRandom=t+25+rnd()*35;if(!SAM.target&&goblins.some(o=>o.alive&&!o.targeted&&!o.ranged)){sammiHunt(t);toast('Sammi hat Lust auf Goblin-Jagd!',true);}}
  if(!sam.visible){sBubble.hidden=true;return;}
  if(SAM.target&&!SAM.target.alive)SAM.target=null;
  const hunting=!!SAM.target,target=hunting?SAM.target.g.position:(t<SAM.until?SAM.home:SAM.exit);sv.subVectors(target,sam.position);sv.y=0;const d=sv.length(),moving=d>.05;
@@ -1072,7 +1097,7 @@ function robiFrame(t,b,dt){
  if(RB.state==='off'){rBubble.hidden=true;return;}
  let target=null;
  if(RB.state==='in'){
-  if(!RB.target||!RB.target.alive)RB.target=nearest()||goblins.find(o=>o.alive)||null;
+  if(!RB.target||!RB.target.alive)RB.target=nearest()||goblins.find(o=>o.alive&&!o.ranged)||null;
   if(RB.target){rTmp.copy(RB.target.g.position);rTmp.y=0;rv.subVectors(rTmp,rRoot.position);const d=rv.length();
     if(d<.9){RB.state='strike';RB.strikeT=t;RB.hit=false;}else rRoot.position.addScaledVector(rv,Math.min(1,6*dt/d));
     rRoot.lookAt(rTmp.x,0,rTmp.z);target=runPose(t);}
@@ -1133,7 +1158,7 @@ function mcFrame(t,b,dt){
    chrMouth.visible=true;const sp=pose(0,0);Object.assign(sp,{lSz:2.7,rSz:-2.7,lE:-.2,rE:-.2,hdx:-.45,sx:-.2,kL:.25,kR:.25,jump:.06*Math.abs(Math.sin(t*30))});charPose(CHR,sp,dt);
    const cover=pose(0,0);Object.assign(cover,{lSz:.3,rSz:-.3,lSx:-2.3,rSx:-2.3,lE:-2.2,rE:-2.2,kL:.3,kR:.3,hdx:.2});charPose(MEN,cover,dt);
    shock.scale.setScalar(R);shock.material.opacity=.9*(1-Math.min(1,u));
-   goblins.forEach(o=>{if(o.alive&&Math.hypot(o.g.position.x-C_POS.x,o.g.position.z-C_POS.z)<R){kill(o,false,0xd16cff);MC.killed++;}});
+   goblins.forEach(o=>{if(o.alive&&!o.ranged&&Math.hypot(o.g.position.x-C_POS.x,o.g.position.z-C_POS.z)<R){kill(o,false,0xd16cff);MC.killed++;}});
    if(u>=1){MC.state='party';MC.t=t;shock.visible=false;chrMouth.visible=false;}}
  if(MC.state==='party'){charPose(MEN,pose(1,b),dt);charPose(CHR,pose(0,b),dt);mSay=MC.killed?'Des woar mei Christine. '+MC.killed+' Goblins weg!':'Des woar mei Christine!';
    if(t-MC.t>3.2)MC.state='out';}
@@ -1188,7 +1213,7 @@ function mamaFrame(t,dt){
 
 const kv=new THREE.Vector3();
 function endGame(msg,title='GAME OVER'){gameOver=true;document.getElementById('overTitle').textContent=title;document.getElementById('overMsg').textContent=msg;document.getElementById('overScore').textContent=score;overEl.hidden=false;banner.hidden=true;pushBtn.hidden=true;}
-function clearField(t){goblins.forEach(o=>{if(o.alive){o.alive=false;scene.remove(o.g);poof(o.g.position,0xffffff);}});shots.forEach(s=>scene.remove(s.m));shots.length=0;
+function clearField(t){goblins.forEach(o=>{if(o.alive){o.alive=false;scene.remove(o.g);poof(o.g.position,0xffffff);}});shots.forEach(s=>scene.remove(s.m));shots.length=0;stones.forEach(s=>scene.remove(s.m));stones.length=0;
  if(K.state!=='off'){K.state='off';kRoot.visible=false;banner.hidden=true;pushBtn.hidden=true;K.next=t+18;}
  if(AL.state!=='off'){AL.state='off';aRoot.visible=false;aBubble.hidden=true;AL.next=t+28;}
  flashEl.animate([{opacity:.85,background:'#fff'},{opacity:0,background:'#fff'}],{duration:900});}

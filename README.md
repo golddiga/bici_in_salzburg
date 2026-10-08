@@ -68,4 +68,9 @@ Bici hat fünf Leben; bei null ist Game Over. Ebenso, wenn die Bühnen-Leiste le
 **Der Alei** kommt ab etwa 45 Sekunden mit zwei Bier, torkelt auf die Tanzfläche („Bici, sauf ma oan!“) und
 leert wie Kerstin die Bühnen-Leiste. Zurückdrängen wie bei Kerstin; sind beide da, trifft K den, der näher ist.
 
+**Fernkampf-Goblins** (jeder fünfte, lila Kapuze, orange Markierung): Sie bleiben in etwa 7 m Abstand stehen,
+schleudern drei Steine (je ½ Leben, Sammi wehrt mit 50 % ab) und laufen dann wie normale Goblins auf Bici zu.
+Nur **Baileys** kann sie besiegen: Ist ein Fernkämpfer auf dem Platz, rollt Baileys mit **R** (oder Antippen des
+Fernkämpfers) immer gezielt auf ihn zu und erwischt ihn sicher. Mozartkugeln, Robi, Sammi und Christine wirken nicht.
+
 Goblin = 1 Punkt, Kerstin oder Alei vertrieben = je 10 Punkte; sie kommt jedes Mal hartnäckiger zurück.
