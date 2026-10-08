@@ -661,7 +661,7 @@ const WORLDS=[
 WORLDS.forEach((w,i)=>w.speed=1+.1*i);
 const FINALE={name:'Gaisberg',short:'Gaisberg',groups:[W_GAIS],water:null,bot:0x2a2f66,fog:0x1a1d3a,speed:1};
 const ALLW=[W_RES,W_HILL,W_FOUNT,W_FEST,W_MIRA,W_XMAS,W_WERF,W_HBF,W_GET,W_GAIS],WORLD_AT=[150,300,450,600,750,900],WIN_AT=1000;
-let world=0,SPEED=1;const BASE_SPEED=1.2; // goblin base speed multiplier (+20 %)
+let world=0,SPEED=1;const BASE_SPEED=1.2,SPAWN_RATE=1.3; // goblin speed (+20 %) and spawn density (+30 %)
 function setWorld(n){world=n;const w=WORLDS[n]||FINALE;SPEED=w.speed;ALLW.forEach(g=>g.visible=w.groups.includes(g));
  water.visible=!!w.water;if(w.water)water.position.set(w.water[0],0,w.water[1]);
  sky.material.uniforms.bot.value.setHex(w.bot);scene.fog.color.setHex(w.fog).convertSRGBToLinear();document.getElementById('world').textContent=w.short;}
@@ -869,7 +869,7 @@ function restart(){goblins.forEach(o=>o.alive&&scene.remove(o.g));goblins.length
  BAI.state='home';bob.position.copy(BAI_HOME);setWorld(0);mamaReset();
  winShowAt=0;fws.forEach(f=>f.parts.forEach(([m])=>scene.remove(m)));fws.length=0;}
 function fight(t,dt){
- if(!gameOver&&t>nextSpawn){spawn();nextSpawn+=5/SPEED;}
+ if(!gameOver&&t>nextSpawn){spawn();nextSpawn+=5/(SPEED*SPAWN_RATE);}
  const tmp=new THREE.Vector3();
  goblins.forEach(o=>{if(!o.alive)return;const p=o.g.position,d=Math.hypot(p.x,p.z);
   if(d<1.3){damage(o,t);return;}
