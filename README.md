@@ -38,7 +38,7 @@ Buttons für +50 und +150 Punkte, um Welten und Level-ups direkt zu testen.
 
 ## Level
 
-Alle 150 Punkte geht es automatisch in ein neues Level, und jedes Level macht die Goblins 10 % schneller.
+Alle 150 Punkte geht es automatisch in ein neues Level: Die Herzen werden aufgefüllt, und die Goblins werden 10 % schneller.
 
 | Level | ab Punkten | Ort |
 |---|---|---|
@@ -65,14 +65,14 @@ Tanzfläche betritt: Kerstin bleibt stehen, die Bühne leert sich nicht weiter, 
 Kerstin heim. Punkte gibt es dafür keine, die 10 Punkte bringt nur selbst Zurückdrängen.
 
 Bici hat fünf Leben; bei null ist Game Over. Ebenso, wenn die Bühnen-Leiste leer ist.
-**Der Alei** kommt oft (erstmals nach etwa 25 Sekunden, dann alle 12 bis 18 Sekunden) mit zwei Bier und torkelt
+**Der Alei** kommt ab Level 3 (Mirabellgarten), dann alle 20 bis 30 Sekunden, mit zwei Bier und torkelt
 auf Bici zu („Bici, sauf ma oan!“). Zurückdrängen wie bei Kerstin gibt 10 Punkte; sind beide da, trifft K den, der
 näher ist. Ab und zu beißt Sammi ihn in die Wade, dann taumelt er ein halbes Zurückdrängen weit zurück.
 Erreicht er Bici, stoßen sie an: Bici ist 5 Sekunden beschwipst, schwankt, und nur jeder 2. Wurf trifft.
 
-**Fernkampf-Goblins** (jeder fünfte, lila Kapuze, orange Markierung): Sie bleiben in etwa 7 m Abstand stehen,
+**Fernkampf-Goblins** (ab Level 2 jeder fünfte, lila Kapuze, orange Markierung): Sie bleiben in etwa 7 m Abstand stehen,
 schleudern drei Steine (je ½ Leben, Sammi wehrt mit 50 % ab) und laufen dann wie normale Goblins auf Bici zu.
-Mozartkugeln prallen an ihnen ab. Ist ein Fernkämpfer auf dem Platz, rollt **Baileys** mit **R** (oder Antippen
-des Fernkämpfers) immer gezielt auf ihn zu und erwischt ihn sicher. Sammi, Robi und Christine erledigen sie ebenfalls.
+Sie brauchen 2 Mozartkugeln. Ist ein Fernkämpfer auf dem Platz, rollt **Baileys** mit **R** immer gezielt auf ihn
+zu und erwischt ihn mit einem Treffer. Sammi, Robi und Christine erledigen sie ebenfalls.
 
 Goblin = 1 Punkt, Kerstin oder Alei vertrieben = je 10 Punkte; sie kommt jedes Mal hartnäckiger zurück.
