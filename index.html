@@ -96,6 +96,11 @@ button.push{background:#2a9d8f;color:var(--ink);box-shadow:0 3px 0 #5b3a8c}
 .over{position:fixed;inset:0;display:grid;place-items:center;padding-inline:16px;background:rgba(10,8,24,.55);z-index:5}
 .over .card{text-align:center;background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:16px;padding:24px 28px;max-width:420px}
 .over .logo{font-size:clamp(36px,8vw,60px)}
+button.stiegl{background:#c8102e;color:#fff;box-shadow:0 3px 0 #6e0a1a;animation:glowS 1.1s ease-in-out infinite alternate}
+@keyframes glowS{to{box-shadow:0 3px 0 #6e0a1a,0 0 20px 5px rgba(200,16,46,.6)}}
+.bubble.stg{background:#c8102e;color:#fff;box-shadow:4px 4px 0 #6e0a1a;font-size:clamp(15px,2.4vw,20px);max-width:280px}
+.bubble.stg::after{border-top-color:#c8102e}
+#stiegl.on{color:#ff6b7f}
 button.perk{background:#ff7ad9;color:var(--night);box-shadow:0 3px 0 #8e1f3f;animation:glow 1.1s ease-in-out infinite alternate}
 @keyframes glow{to{box-shadow:0 3px 0 #8e1f3f,0 0 20px 5px rgba(255,122,217,.65)}}
 .dev{position:fixed;top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:7;display:flex;gap:6px;align-items:center;
@@ -124,7 +129,7 @@ button.perk{background:#ff7ad9;color:var(--night);box-shadow:0 3px 0 #8e1f3f;ani
 /* ---------- handheld mode (touch devices): Game-Boy-style pad ---------- */
 .pad,.tb{display:none}
 html{touch-action:manipulation}
-body.gb .hint,body.gb .kb,body.gb .controls>button:not(#fmtBtn):not(#perkBtn),body.gb .logo{display:none!important}
+body.gb .hint,body.gb .kb,body.gb .controls>button:not(#fmtBtn):not(#perkBtn):not(#crateBtn):not(#stieglBtn),body.gb .logo{display:none!important}
 body.gb .tb{display:inline}
 body.gb .pad{display:grid;position:fixed;z-index:4;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
     --gb:#d8d3c9;--navy:#2f2a5c;--plum:#a3245a;--cross:#26242e}
@@ -198,6 +203,9 @@ body.gb .grille i{width:5px;height:42px;border-radius:3px;background:rgba(47,42,
   body.gb .stats{margin-right:0}
 }
 body.gb #perkBtn{position:fixed;z-index:6;right:18px;bottom:calc(var(--pad,0px) - 50px);font-size:11px;padding:9px 14px}
+body.gb #crateBtn,body.gb #stieglBtn{position:fixed;z-index:6;right:18px;bottom:calc(var(--pad,0px) + 14px);font-size:11px;padding:9px 14px}
+body.gb #stieglBtn{bottom:calc(var(--pad,0px) + 56px)}
+@media (orientation:landscape){body.gb #crateBtn{right:max(22px,env(safe-area-inset-right,0px));bottom:calc(195px + env(safe-area-inset-bottom,0px))}body.gb #stieglBtn{right:max(22px,env(safe-area-inset-right,0px));bottom:calc(240px + env(safe-area-inset-bottom,0px))}}
 @media (orientation:landscape){body.gb #perkBtn{right:max(22px,env(safe-area-inset-right,0px));bottom:calc(150px + env(safe-area-inset-bottom,0px))}}
 body.gb #fmtBtn{position:fixed;z-index:6;top:calc(18px + env(safe-area-inset-top,0px));left:18px;font-size:10px;padding:7px 11px}
 @media (orientation:landscape){body.gb #fmtBtn{top:calc(10px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px))}}
@@ -224,6 +232,7 @@ body.gb #fmtBtn{position:fixed;z-index:6;top:calc(18px + env(safe-area-inset-top
 <div class="bubble menei" id="mbubble" hidden></div>
 <div class="bubble scream" id="cbubble" hidden></div>
 <div class="bubble mama" id="mabubble" hidden></div>
+<div class="bubble stg" id="stbubble" hidden></div>
 <div class="banner" id="banner" hidden><span id="bWho">Kerstin will die Tanzfläche!</span> <span class="kb">Tippe <i class="bObj">sie</i> an oder drücke K</span><span class="tb">Drücke B oder tippe <i class="bObj">sie</i> an</span>, um <i class="bObj">sie</i> zurückzudrängen.</div>
 <div class="over" id="over" hidden><div class="card"><div class="logo" id="overTitle">GAME OVER</div><p><span id="overMsg">Die Goblins haben den Residenzplatz erobert.</span><br>Punkte: <b id="overScore">0</b></p><button id="againBtn" type="button">Nochmal</button></div></div>
 <div class="over" id="pauseEl" hidden><div class="card"><div class="logo">PAUSE</div><p>Bici verschnauft kurz. Die Goblins warten.<br><small>Tippen zum Weiterspielen</small></p><button id="resumeBtn" type="button">Weiter</button></div></div>
@@ -260,6 +269,7 @@ body.gb #fmtBtn{position:fixed;z-index:6;top:calc(18px + env(safe-area-inset-top
       <span>Punkte</span><b id="score">0</b>
       <span>Ort</span><b class="joker" id="world">Residenz</b>
       <span>Joker</span><b class="joker">Sammi 50 %</b>
+      <span>Stiegl</span><b class="joker" id="stiegl">–</b>
       <span>Bühne</span><b><i class="bar"><i id="stageBar"></i></i></b>
       <span>Leben</span><b id="hearts" class="hearts">♥♥♥♥♥</b>
       <span class="opt">Beat</span><b class="opt" id="beat">0</b>
@@ -275,6 +285,8 @@ body.gb #fmtBtn{position:fixed;z-index:6;top:calc(18px + env(safe-area-inset-top
     <div>
       <div class="controls">
         <button class="perk" id="perkBtn" type="button" hidden>★ Menei &amp; Christine</button>
+        <button class="stiegl" id="crateBtn" type="button" hidden>Kiste anwerfen</button>
+        <button class="stiegl" id="stieglBtn" type="button" hidden>Stiegl-Joker (S)</button>
         <button class="ghost" id="fmtBtn" type="button">Game-Boy-Modus</button>
         <button class="ghost" id="pauseBtn" type="button" aria-label="Pause"><span class="pi" aria-hidden="true">❚❚</span><span class="pl">Pause</span></button>
         <button class="ghost" id="soundBtn" type="button">Sound an</button>
@@ -283,7 +295,7 @@ body.gb #fmtBtn{position:fixed;z-index:6;top:calc(18px + env(safe-area-inset-top
         <button id="throwBtn" type="button">Mozartkugel werfen</button>
         <button class="push" id="pushBtn" type="button" hidden>Zurückdrängen</button>
       </div>
-      <div class="hint">Goblins antippen oder F · Kerstin antippen oder K · R = Baileys rollt (gegen Fernkämpfer) · Leertaste = Move · C = Perk · M = Sound · P = Pause</div>
+      <div class="hint">Goblins antippen oder F · Kerstin antippen oder K · R = Baileys rollt (gegen Fernkämpfer) · Leertaste = Move · C = Perk · S = Stiegl · M = Sound · P = Pause</div>
     </div>
   </div>
 </div>
@@ -661,7 +673,7 @@ const WORLDS=[
  {name:'Getreidegasse',short:'Getreide',intro:'Getreidegasse, 00:15',lost:'die Getreidegasse',groups:[W_GET,W_HILL],water:null,bot:0x5a3a78,fog:0x2a2550}];
 WORLDS.forEach((w,i)=>w.speed=1+.1*i);
 const FINALE={name:'Gaisberg',short:'Gaisberg',groups:[W_GAIS],water:null,bot:0x2a2f66,fog:0x1a1d3a,speed:1};
-const ALLW=[W_RES,W_HILL,W_FOUNT,W_FEST,W_MIRA,W_XMAS,W_WERF,W_HBF,W_GET,W_GAIS],WORLD_AT=[150,300,450,600,750,900],WIN_AT=1000;
+const ALLW=[W_RES,W_HILL,W_FOUNT,W_FEST,W_MIRA,W_XMAS,W_WERF,W_HBF,W_GET,W_GAIS],WORLD_AT=[100,200,300,400,500,600],WIN_AT=700;
 let world=0,SPEED=1;const BASE_SPEED=1.2,SPAWN_RATE=1.3; // goblin speed (+20 %) and spawn density (+30 %)
 function setWorld(n){world=n;const w=WORLDS[n]||FINALE;SPEED=w.speed;ALLW.forEach(g=>g.visible=w.groups.includes(g));
  water.visible=!!w.water;if(w.water)water.position.set(w.water[0],0,w.water[1]);
@@ -772,7 +784,7 @@ function toggleSound(){
 const soundBtn=document.getElementById('soundBtn');soundBtn.addEventListener('click',toggleSound);
 function nextMove(){if(!paused)offset++;}
 document.getElementById('nextBtn').addEventListener('click',nextMove);
-addEventListener('keydown',e=>{if(e.key==='p'||e.key==='P'||e.key==='Escape'){togglePause();return;}if(e.key==='m'||e.key==='M')toggleSound();if(paused)return;if(e.code==='Space'&&e.target.tagName!=='BUTTON'){e.preventDefault();nextMove();}if(e.key==='c'||e.key==='C')usePerk();if(e.key==='f'||e.key==='F')throwAt(nearest());if(e.key==='r'||e.key==='R')bobRolle();if(e.key==='k'||e.key==='K')kPush();});
+addEventListener('keydown',e=>{if(e.key==='p'||e.key==='P'||e.key==='Escape'){togglePause();return;}if(e.key==='m'||e.key==='M')toggleSound();if(paused)return;if(e.code==='Space'&&e.target.tagName!=='BUTTON'){e.preventDefault();nextMove();}if(e.key==='c'||e.key==='C')usePerk();if(e.key==='s'||e.key==='S')useStiegl();if(e.key==='f'||e.key==='F')throwAt(nearest());if(e.key==='r'||e.key==='R')bobRolle();if(e.key==='k'||e.key==='K')kPush();});
 document.getElementById('pushBtn').addEventListener('click',()=>kPush());
 document.getElementById('rollBtn').addEventListener('click',bobRolle);
 document.getElementById('throwBtn').addEventListener('click',()=>throwAt(nearest()));
@@ -782,7 +794,7 @@ document.getElementById('pauseEl').addEventListener('click',e=>{if(e.target.id==
 document.addEventListener('visibilitychange',()=>{if(document.hidden)togglePause(true);});
 /* dev mode (?dev): jump ahead in points to test worlds and level-ups */
 if(new URLSearchParams(location.search).has('dev')){const bar=document.createElement('div');bar.className='dev';
- bar.innerHTML='<b>DEV</b><button type="button" data-p="50">+50</button><button type="button" data-p="150">+150 Punkte</button>';document.body.appendChild(bar);
+ bar.innerHTML='<b>DEV</b><button type="button" data-p="50">+50</button><button type="button" data-p="100">+100 Punkte</button>';document.body.appendChild(bar);
  bar.addEventListener('click',e=>{const p=+e.target.dataset.p;if(!p||gameOver||paused)return;score+=p;elScore.textContent=score;e.target.blur();});}
 /* handheld pad */
 const camV=[0,0],padB=document.getElementById('padB'),padBLabel=document.getElementById('padBLabel');let bPush=false;
@@ -885,10 +897,11 @@ function throwAt(o){if(gameOver||paused||!o||!o.alive||o.targeted)return;o.targe
 function clickAt(x,y){if(gameOver||paused)return;ndc.set((x-SR.left)/SR.width*2-1,-((y-SR.top)/SR.height)*2+1);raycaster.setFromCamera(ndc,camera);
  if(K.state==='in'&&raycaster.intersectObject(kRoot,true).length){kPushK();return;}
  if(AL.state==='in'&&raycaster.intersectObject(aRoot,true).length){aPush();return;}
+ if(CRATE.alive&&raycaster.intersectObject(CRATE.g,true).length){throwAt(CRATE);return;}
  const hit=raycaster.intersectObjects(goblins.filter(o=>o.alive&&!o.targeted).map(o=>o.g),true)[0];throwAt(hit?hit.object.userData.gob:nearest());}
 function restart(){goblins.forEach(o=>o.alive&&scene.remove(o.g));goblins.length=0;hearts=5;score=0;elScore.textContent=0;showHearts();
  gameOver=false;overEl.hidden=true;nextSpawn=(gnow()-t0)/1000+3;resetKerstin((gnow()-t0)/1000);resetAlei((gnow()-t0)/1000);stones.forEach(s=>scene.remove(s.m));stones.length=0;seenRanged=false;sam.visible=false;SAM.until=-1;SAM.target=null;SAM.bite=false;SAM.nextRandom=(gnow()-t0)/1000+35;robiReset();mcReset();
- BAI.state='home';bob.position.copy(BAI_HOME);setWorld(0);mamaReset();
+ BAI.state='home';bob.position.copy(BAI_HOME);setWorld(0);mamaReset();stieglReset();
  winShowAt=0;fws.forEach(f=>f.parts.forEach(([m])=>scene.remove(m)));fws.length=0;}
 function fight(t,dt){
  if(!gameOver&&t>nextSpawn){spawn();nextSpawn+=5/(SPEED*SPAWN_RATE);}
@@ -907,7 +920,7 @@ function fight(t,dt){
  for(let i=goblins.length-1;i>=0;i--)if(!goblins[i].alive)goblins.splice(i,1);
  for(let i=shots.length-1;i>=0;i--){const s=shots[i];s.t+=dt/.42;tmp.copy(s.o.g.position);tmp.y+=.75;if(s.off)tmp.add(s.off);
   s.m.position.lerpVectors(s.from,tmp,Math.min(1,s.t));s.m.position.y+=1.1*Math.sin(Math.PI*Math.min(1,s.t));s.m.rotation.x+=dt*14;
-  if(s.t>=1){scene.remove(s.m);shots.splice(i,1);if(s.off){s.o.targeted=false;poof(s.m.position,0x9a9a9a);biciSay('Hicks … daneben!',t,1.2);}else if(s.o.hp>1){s.o.hp--;s.o.targeted=false;poof(s.o.g.position,0xff9a2e);sfx('throw');}else kill(s.o,true);}}
+  if(s.t>=1){scene.remove(s.m);shots.splice(i,1);if(s.off){s.o.targeted=false;poof(s.m.position,0x9a9a9a);biciSay('Hicks … daneben!',t,1.2);}else if(s.o.crate)crateHit(t);else if(s.o.hp>1){s.o.hp--;s.o.targeted=false;poof(s.o.g.position,0xff9a2e);sfx('throw');}else kill(s.o,true);}}
  for(let i=bursts.length-1;i>=0;i--){const b=bursts[i];b.t+=dt;b.parts.forEach(([m,v])=>{m.position.addScaledVector(v,dt);v.y-=9*dt;m.material.opacity=Math.max(0,1-b.t/.7);});
   if(b.t>.7){b.parts.forEach(([m])=>{scene.remove(m);m.geometry.dispose();m.material.dispose();});bursts.splice(i,1);}}
  if(gnow()<throwUntil){arms[1].sh.rotation.set(-2.3,0,-.25);arms[1].el.rotation.x=-.15;}}
@@ -1199,6 +1212,60 @@ const MAMA={state:'off',used:-1,t:0,reply:false},M_ENTRY=new THREE.Vector3(-13,0
 const maBubble=document.getElementById('mabubble');
 function ridePose(){return Object.assign(pose(0,0),{hx:0,hrz:0,sz:0,hdz:0,lSx:-1.15,rSx:-1.15,lSz:.12,rSz:-.12,lE:-.35,rE:-.35,kL:.18,kR:.18,sx:.08,tz:.45});}
 function scoldPose(t){return Object.assign(pose(0,0),{hx:0,hrz:0,sz:0,rSx:-1.7,rSz:-.25+.25*Math.sin(t*14),rE:-.2,lSz:.9,lSx:.2,lE:-1.9,sx:-.05,hdz:.12*Math.sin(t*7),kL:.12,kR:.12,tz:.2*Math.sin(t*7)});}
+/* ---------- Stiegl: crate after every third level unlocks the joker; the driver heals 3 hearts ---------- */
+const stieglLabel=(w,h,txt,fs)=>{const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#c8102e';x.fillRect(0,0,w,h);
+ x.fillStyle='#fff';x.font='italic 900 '+fs+'px Georgia,serif';x.textAlign='center';x.textBaseline='middle';x.fillText(txt,w/2,h/2+2);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t;};
+const stRed=M(0xc8102e,{roughness:.5}),stTex=stieglLabel(256,96,'Stiegl',64);
+const CRATE={g:new THREE.Group(),alive:false,crate:true,targeted:false,hp:3,until:0};
+{const g=CRATE.g;g.position.set(3.4,0,-4.2);g.rotation.y=-.5;g.visible=false;scene.add(g);
+ box(.9,.55,.6,stRed,0,.275,0,g);
+ [1,-1].forEach(q=>{const lb=new THREE.Mesh(new THREE.PlaneGeometry(.7,.26),B(0xffffff,{map:stTex}));lb.position.set(0,.3,.301*q);if(q<0)lb.rotation.y=Math.PI;g.add(lb);});
+ const bottle=M(0x5a3410,{roughness:.2,metalness:.2}),cap=M(0xd9b44a,{metalness:.8,roughness:.3});
+ for(let i=0;i<4;i++)for(let k=0;k<3;k++){const bx=-.33+i*.22,bz=-.18+k*.18;const b=new THREE.Mesh(new THREE.CylinderGeometry(.045,.05,.3,10),bottle);b.position.set(bx,.6,bz);g.add(b);
+  const c2=new THREE.Mesh(new THREE.CylinderGeometry(.022,.022,.03,8),cap);c2.position.set(bx,.77,bz);g.add(c2);}
+ g.traverse(o=>{o.castShadow=true;});}
+let stieglJoker=false;
+const elStiegl=document.getElementById('stiegl'),crateBtn=document.getElementById('crateBtn'),stieglBtn=document.getElementById('stieglBtn');
+function stieglUI(){elStiegl.textContent=stieglJoker?'bereit (S)':CRATE.alive?'Kiste '+(3-CRATE.hp)+'/3':'–';elStiegl.classList.toggle('on',stieglJoker||CRATE.alive);
+ crateBtn.hidden=!CRATE.alive;stieglBtn.hidden=!stieglJoker;}
+function spawnCrate(t){Object.assign(CRATE,{alive:true,targeted:false,hp:3,until:t+25});CRATE.g.visible=true;stieglUI();
+ toast('Eine Kiste Stiegl! 3 Mozartkugeln drauf – dann gibt’s den Stiegl-Joker.',true);}
+function removeCrate(){CRATE.alive=false;CRATE.targeted=false;CRATE.g.visible=false;stieglUI();}
+function crateHit(t){CRATE.targeted=false;CRATE.hp--;poof(CRATE.g.position,0xffd23a);sfx('poof');
+ if(CRATE.hp<=0){removeCrate();stieglJoker=true;stieglUI();toast('Stiegl-Joker freigeschaltet! Einsetzen mit S oder dem roten Button.',true);
+  if(soundOn){const a=ac.currentTime;[659,784,988].forEach((f,i)=>tone('square',f,a+i*.1,.16,.08,3500));}}else stieglUI();}
+crateBtn.addEventListener('click',()=>throwAt(CRATE));
+/* the delivery van and its driver */
+const vanG=new THREE.Group();vanG.visible=false;scene.add(vanG);const vanWheels=[];
+{box(4,2.2,2,stRed,-.5,1.45,0,vanG);box(1.4,1.7,1.96,stRed,2.1,1.2,0,vanG);box(.05,.8,1.7,M(0x1d2433,{roughness:.1,metalness:.4}),2.82,1.55,0,vanG);
+ [1,-1].forEach(q=>{const lb=new THREE.Mesh(new THREE.PlaneGeometry(3,1),B(0xffffff,{map:stTex}));lb.position.set(-.5,1.55,1.01*q);if(q<0)lb.rotation.y=Math.PI;vanG.add(lb);});
+ [[-1.7,1],[-1.7,-1],[1.9,1],[1.9,-1]].forEach(([x,z])=>{const w=new THREE.Mesh(new THREE.CylinderGeometry(.36,.36,.25,16),M(0x15151a));w.rotation.x=Math.PI/2;w.position.set(x,.36,z);add(w,vanG);vanWheels.push(w);});}
+const DRV=makeChar({pants:M(0x2b2b30),top:stRed,hair:skin,scale:1.06});DRV.r.scale.set(.92,1.08,.92);
+DRV.r.traverse(o=>{if(o.isMesh&&o.material===skin&&o.scale.x>1.8&&o.scale.y<.6)o.visible=false;});
+dball(.06,M(0xd8d8d8,{roughness:.9}),1.9,.45,.6,0,.165,.235,DRV.rig.headP);
+const STG={state:'off',t:0,said:0},stBubble=document.getElementById('stbubble');
+const VAN_IN=new THREE.Vector3(-26,0,8),VAN_STOP=new THREE.Vector3(-9,0,8),DRV_DOOR=new THREE.Vector3(-8.2,0,6.6),DRV_BICI=new THREE.Vector3(-1.5,0,1.5);
+const STG_LINES=['Griaß di, Bici! Stiegl-Lieferung, frisch g’kühlt!','Drei Herzerl – oans für jede Stufn!','Wer tanzt, braucht a Kraft. Und die is im Fassl!',
+ 'Fürs Goblin-Gsindl gibt’s nix – de san unter 16!','Seit 40 Jahr fahr i Bier aus, und no nie oa Flaschn verlorn!','Und sag am Alei, er soll heut a Wasser trinkn!','Prost, Bici – des geht aufs Haus!'];
+function useStiegl(){if(!stieglJoker||paused||gameOver||STG.state!=='off')return;stieglJoker=false;stieglUI();const t=(gnow()-t0)/1000;
+ Object.assign(STG,{state:'drive',t,said:0});vanG.visible=true;vanG.position.copy(VAN_IN);vanG.rotation.y=0;toast('Der Stiegl-Wagen kommt!',true);
+ if(soundOn){const a=ac.currentTime;[0,.25].forEach(d=>tone('square',440,a+d,.18,.07,2000));}}
+function stieglReset(){STG.state='off';vanG.visible=false;DRV.r.visible=false;stBubble.hidden=true;stieglJoker=false;removeCrate();}
+function stieglFrame(t,b,dt){
+ if(CRATE.alive&&t>CRATE.until){removeCrate();toast('Die Stiegl-Kiste ist weg … nächstes Mal schneller!',false);}
+ if(CRATE.alive)CRATE.g.position.y=.04*Math.abs(Math.sin(t*3));
+ if(STG.state==='off'){stBubble.hidden=true;return;}
+ let say='';
+ if(STG.state==='drive'){mcV.subVectors(VAN_STOP,vanG.position);const d=mcV.length();vanWheels.forEach(w=>w.rotation.y+=dt*12);
+  if(d<.1){STG.state='walk';DRV.r.visible=true;DRV.r.position.copy(DRV_DOOR);}else vanG.position.addScaledVector(mcV,Math.min(1,9*dt/d));}
+ if(STG.state==='walk'){say=STG_LINES[0];if(charTo(DRV,DRV_BICI,dt,t)){STG.state='heal';STG.t=t;STG.said=1+Math.floor(rnd()*(STG_LINES.length-1));
+  const before=hearts;hearts=Math.min(5,hearts+3);showHearts();poof(root.position,0x7bff9a);poof(root.position,0xff6f93);toast('Stiegl-Bonus: +'+(hearts-before)+' Herzen!',true);
+  if(soundOn){const a=ac.currentTime;[523,659,784,1047].forEach((f,i)=>tone('triangle',f,a+i*.12,.25,.1));}}}
+ if(STG.state==='heal'){DRV.r.lookAt(0,0,0);const p=pose(0,0);Object.assign(p,{rSx:-2.6,rSz:-.2,rE:-.2,lSz:.4,lE:-.6,hdx:-.1});charPose(DRV,p,dt);
+  say=STG_LINES[STG.said];if(t-STG.t>3.2)STG.state='back';}
+ if(STG.state==='back'){if(charTo(DRV,DRV_DOOR,dt,t)){STG.state='leave';DRV.r.visible=false;}}
+ if(STG.state==='leave'){vanG.position.x-=dt*10;vanWheels.forEach(w=>w.rotation.y-=dt*12);if(vanG.position.x<VAN_IN.x){STG.state='off';vanG.visible=false;}}
+ if(say&&DRV.r.visible)bubbleAt(stBubble,DRV,say,2.6);else stBubble.hidden=true;}
 function mamaReset(){MAMA.state='off';MAMA.used=-1;mamaG.visible=false;maBubble.hidden=true;K.held=false;}
 function mamaFrame(t,dt){
  if(!gameOver&&MAMA.state==='off'&&MAMA.used!==world&&K.state==='in'&&K.r<2.4){
@@ -1226,11 +1293,11 @@ function mamaFrame(t,dt){
 
 const kv=new THREE.Vector3();
 function endGame(msg,title='GAME OVER'){gameOver=true;document.getElementById('overTitle').textContent=title;document.getElementById('overMsg').textContent=msg;document.getElementById('overScore').textContent=score;overEl.hidden=false;banner.hidden=true;pushBtn.hidden=true;}
-function clearField(t){goblins.forEach(o=>{if(o.alive){o.alive=false;scene.remove(o.g);poof(o.g.position,0xffffff);}});shots.forEach(s=>scene.remove(s.m));shots.length=0;stones.forEach(s=>scene.remove(s.m));stones.length=0;
+function clearField(t){if(CRATE.alive)removeCrate();goblins.forEach(o=>{if(o.alive){o.alive=false;scene.remove(o.g);poof(o.g.position,0xffffff);}});shots.forEach(s=>scene.remove(s.m));shots.length=0;stones.forEach(s=>scene.remove(s.m));stones.length=0;
  if(K.state!=='off'){K.state='off';kRoot.visible=false;banner.hidden=true;pushBtn.hidden=true;K.next=t+18;}
  if(AL.state!=='off'){AL.state='off';aRoot.visible=false;aBubble.hidden=true;AL.next=t+15;}
  flashEl.animate([{opacity:.85,background:'#fff'},{opacity:0,background:'#fff'}],{duration:900});}
-function enterWorld(n,t){setWorld(n);const w=WORLDS[n];clearField(t);level=n+1;elLevel.textContent=level;hearts=5;showHearts();if(n===2)AL.next=t+12;
+function enterWorld(n,t){setWorld(n);const w=WORLDS[n];clearField(t);level=n+1;elLevel.textContent=level;hearts=5;showHearts();if(n===2)AL.next=t+12;if(n%3===0)spawnCrate(t);
  if(n===2)MC.next=Math.floor(score/50)*50+50;
  nextSpawn=t+4;intro.innerHTML='<div>'+w.intro+'<small>Level '+level+' von '+WORLDS.length+'</small></div>';intro.style.opacity=1;introUntil=t+3.4;
  toast('Level '+level+': '+w.name+' · Herzen voll · Goblins +10 % schneller',true);
@@ -1273,7 +1340,7 @@ function frame(){requestAnimationFrame(frame);
  apply(shown);root.rotation.y=spin;
  if(t<drunkUntil){const k=Math.min(1,(drunkUntil-t)/.6);root.rotation.z=.16*Math.sin(t*3.1)*k;root.rotation.x=.08*Math.sin(t*2.3)*k;root.position.x=.18*Math.sin(t*1.7)*k;}
  else if(root.rotation.z||root.position.x){root.rotation.z=root.rotation.x=0;root.position.x=0;}
-bobFrame(m,b,t,dt);fight(t,dt);kerstinFrame(t,b,dt);aleiFrame(t,b,dt);rivalsUI();sammiFrame(t,dt);robiFrame(t,b,dt);mcFrame(t,b,dt);mamaFrame(t,dt);
+bobFrame(m,b,t,dt);fight(t,dt);kerstinFrame(t,b,dt);aleiFrame(t,b,dt);rivalsUI();sammiFrame(t,dt);robiFrame(t,b,dt);mcFrame(t,b,dt);mamaFrame(t,dt);stieglFrame(t,b,dt);
  if(!gameOver){if(world<WORLD_AT.length&&score>=WORLD_AT[world])enterWorld(world+1,t);if(score>=WIN_AT)winGame(t);}
  worldFrame(t,dt);
  if(rivalIn()!==bPush){bPush=!bPush;padBLabel.textContent=bPush?'Drängen':'Rolle';padB.classList.toggle('alert',bPush);padB.setAttribute('aria-label',bPush?'B: zurückdrängen':'B: Baileys rollt');}

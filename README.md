@@ -34,22 +34,22 @@ Joker **Sammi**, ein schwarzer Shih Tzu: Würde Bici Schaden nehmen, rennt er he
 bellt laut. Mit 50 % Chance verbellt er den Goblin und der Schaden fällt weg, sonst passiert nichts.
 
 **Dev-Modus:** `?dev` an die Adresse hängen (z. B. `…/bici_in_salzburg/?dev`), dann gibt es oben
-Buttons für +50 und +150 Punkte, um Welten und Level-ups direkt zu testen.
+Buttons für +50 und +100 Punkte, um Welten und Level-ups direkt zu testen.
 
 ## Level
 
-Alle 150 Punkte geht es automatisch in ein neues Level: Die Herzen werden aufgefüllt, und die Goblins werden 10 % schneller.
+Alle 100 Punkte geht es automatisch in ein neues Level: Die Herzen werden aufgefüllt, und die Goblins werden 10 % schneller.
 
 | Level | ab Punkten | Ort |
 |---|---|---|
 | 1 | 0 | Residenzplatz |
-| 2 | 150 | Festung Hohensalzburg: Burghof mit Linde und Brunnen, Alpen am Horizont |
-| 3 | 300 | Mirabellgarten: Blumenbeete, Statuen, Blick auf die Festung |
-| 4 | 450 | Weihnachtsmarkt am Residenzplatz: Schnee, Buden, Christbaum |
-| 5 | 600 | Festung Hohenwerfen: Burg auf dem Felsen, Berge, kreisende Greifvögel |
-| 6 | 750 | Salzburg Hauptbahnhof: Bahnsteig, Glasdach, Abfahrtstafel, durchfahrender Zug |
-| 7 | 900 | Getreidegasse: Zunftschilder, Mozarts Geburtshaus |
-| Finale | 1000 | Gaisberg-Gipfel: Siegestanz mit Feuerwerk über den Lichtern Salzburgs, dann Sieg |
+| 2 | 100 | Festung Hohensalzburg: Burghof mit Linde und Brunnen, Alpen am Horizont |
+| 3 | 200 | Mirabellgarten: Blumenbeete, Statuen, Blick auf die Festung |
+| 4 | 300 | Weihnachtsmarkt am Residenzplatz: Schnee, Buden, Christbaum |
+| 5 | 400 | Festung Hohenwerfen: Burg auf dem Felsen, Berge, kreisende Greifvögel |
+| 6 | 500 | Salzburg Hauptbahnhof: Bahnsteig, Glasdach, Abfahrtstafel, durchfahrender Zug |
+| 7 | 600 | Getreidegasse: Zunftschilder, Mozarts Geburtshaus |
+| Finale | 700 | Gaisberg-Gipfel: Siegestanz mit Feuerwerk über den Lichtern Salzburgs, dann Sieg |
 
 - **Alle 50 Punkte** kommt **Joker Sammi** (und manchmal einfach, wenn er Lust hat) und erledigt einen Goblin.
   Wenn Bici Schaden nehmen würde, bellt er weiterhin mit 50 % Chance den Goblin weg.
@@ -59,6 +59,11 @@ Alle 150 Punkte geht es automatisch in ein neues Level: Die Herzen werden aufgef
   alle 100 Punkte, ab dem Mirabellgarten alle 50.
 - **Baileys** (R): rollt; manchmal rollt er in Richtung der Goblins, walzt alle auf seiner Bahn platt,
   rollt hinaus und kommt zurück.
+
+**Stiegl-Joker:** Zu Beginn von Level 4 und Level 7 steht 25 Sekunden lang eine Kiste Stiegl am Platz.
+Kiste antippen oder „Kiste anwerfen“: Nach 3 Mozartkugeln ist der Stiegl-Joker freigeschaltet (Anzeige in der
+Seitenleiste). Mit **S** oder dem roten Button fährt der Stiegl-Wagen vor, der Fahrer heilt Bici um 3 Herzen
+und haut einen Spruch raus.
 
 **Mama** kommt einmal pro Level auf ihrem E-Scooter (schlank, blond, Pferdeschwanz), sobald Kerstin die
 Tanzfläche betritt: Kerstin bleibt stehen, die Bühne leert sich nicht weiter, Mama schimpft und schickt
